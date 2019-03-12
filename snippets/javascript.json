@@ -1,0 +1,113 @@
+{
+  "eslint-disable": {
+    "prefix": "eslint",
+    "body": ["/* eslint-disable */"],
+    "description": "禁用eslint"
+  },
+  "eslint-enable": {
+    "prefix": "eslint",
+    "body": ["/* eslint-enable */"],
+    "description": "启用eslint"
+  },
+  "eslint-disable-line": {
+    "prefix": "eslint",
+    "body": [" // eslint-disable-line"],
+    "description": "eslint忽略当前行"
+  },
+  "eslint-disable-next-line": {
+    "prefix": "eslint",
+    "body": [" // eslint-disable-next-line"],
+    "description": "eslint忽略下一行"
+  },
+
+  "zpfe.init": {
+    "prefix": "zpfe.init",
+    "body": [
+      "/*",
+      " * @Company: 智联招聘",
+      " * @Author: zhaopin.com",
+      " * @LastEditors: Leo",
+      " * @version: 0.0.0",
+      " * @Date: 2019-02-20 17:17:42",
+      " * @LastEditTime: 2019-02-20 17:18:40",
+      " * @Description: $1",
+      " */",
+      "",
+      "import qs from 'qs'",
+      "import ZPError from '../../util/error'",
+      "import { initHandler, errorHandler, throwIfMiss } from '../../util/'",
+      "",
+      "async function POST (ctx) {",
+      "  try {",
+      "    const init = await initHandler(ctx, { logged: true })",
+      "    let params = {",
+      "      loginUserId: init.loginUserId",
+      "    }",
+      "",
+      "    let { data: res } = await init.\\$fetch.post(`$2?${qs.stringify(params)}`)",
+      "",
+      "    ctx.response.body = res",
+      "    // ctx.response.set({ code: 200, data: res, message: res.message || '成功', taskId: res.taskId || ctx.request.headers.get('x-zp-request-id') })",
+      "  } catch (err) {",
+      "    errorHandler(ctx, err)",
+      "  }",
+      "}",
+      "",
+      "async function GET (ctx) {",
+      "  try {",
+      "    const init = await initHandler(ctx, { logged: true })",
+      "    let params = {",
+      "      loginUserId: init.loginUserId",
+      "    }",
+      "",
+      "    let { data: res } = await init.\\$fetch.get(`$2`, { params })",
+      "",
+      "    ctx.response.body = res",
+      "    // ctx.response.set({ code: 200, data: res, message: res.message || '成功', taskId: res.taskId || ctx.request.headers.get('x-zp-request-id') })",
+      "  } catch (err) {",
+      "    errorHandler(ctx, err)",
+      "  }",
+      "}",
+      "",
+      "export default { GET, POST }"
+    ],
+    "description": "zpfe api init"
+  },
+  "ctx.log.info": {
+    "prefix": "cli",
+    "body": ["ctx.log.info(`[standout] $1 -> `, JSON.stringify($2))$3"],
+    "description": "ctx log info output"
+  },
+  "ctx.log.error": {
+    "prefix": "cle",
+    "body": ["ctx.log.error(`[standout] error -> $1`, simplify(err))$2"],
+    "description": "ctx log error output"
+  },
+  "ZPError": {
+    "prefix": ["zpthrow"],
+    "body": [
+      "throw new ZPError({ code: ${1:res.code || 500}, message: ${2:res.message || '出错了'}, taskId: ${3:res.taskId || ctx.request.headers.get('x-zp-request-id') ||''} })"
+    ],
+    "description": "使用ZPError抛出异常"
+  },
+
+  "Print to console": {
+    "prefix": "cl",
+    "body": ["console.log(`[$1]$2 -> $3`,$4)$5"],
+    "description": "Log output to console"
+  },
+  "Print to console with color": {
+    "prefix": "cl",
+    "body": ["console.log(`%c[$1]$2 -> $3`,'color:#1B8BFF;',$4)$5"],
+    "description": "Log output to console with color"
+  },
+  "Print to console with group": {
+    "prefix": "cg",
+    "body": [
+      "console.groupCollapsed(`------------------> $1 <------------------`)",
+      "console.log(`[$2]$3 -> $4`,$5)$6",
+      "console.groupEnd()"
+    ],
+    "description": "Log output to console with group"
+  }
+}

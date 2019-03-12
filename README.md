@@ -1,4 +1,4 @@
-# zpm-tag README
+# zpm README
 
 > https://xuebin.me/posts/a0508b9c.html
 
@@ -29,7 +29,7 @@ yo code
 vsce package
 ```
 
-This is the README for your extension "zpm-tag". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "zpm". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 

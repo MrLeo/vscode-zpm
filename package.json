@@ -1,38 +1,72 @@
 {
-	"name": "zpm-tag",
-	"displayName": "zpm-tag",
-	"description": "",
-	"version": "0.0.1",
-	"engines": {
-		"vscode": "^1.32.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"onCommand:extension.helloWorld"
-	],
-	"main": "./out/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "extension.helloWorld",
-				"title": "Hello World"
-			}
-		]
-	},
-	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"postinstall": "node ./node_modules/vscode/bin/install",
-		"test": "npm run compile && node ./node_modules/vscode/bin/test"
-	},
-	"devDependencies": {
-		"typescript": "^3.3.1",
-		"vscode": "^1.1.28",
-		"tslint": "^5.12.1",
-		"@types/node": "^10.12.21",
-		"@types/mocha": "^2.2.42"
-	}
+  "name": "zpm",
+  "displayName": "zpm",
+	"description": "自动为当前的Git库添加tag",
+  "keywords": [
+    "zpm",
+    "git",
+    "tag"
+  ],
+  "version": "0.0.1",
+  "publisher": "xuebin.me",
+  "icon": "logo.png",
+  "engines": {
+    "vscode": "^1.32.0"
+  },
+	"homepage": "https://xuebin.me",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MrLeo/zpm-snippet.git"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onCommand:extension.tag"
+  ],
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "vscode-plugin-demo",
+      "properties": {
+        "vscodePluginDemo.yourName": {
+          "type": "string",
+          "default": "guest",
+          "description": "Mr. Leo"
+        },
+        "vscodePluginDemo.showTip": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否在每次启动时显示欢迎提示！"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "extension.tag",
+        "title": "Hello World"
+      }
+		],
+		"snippets": [
+      {
+        "language": "javascript",
+        "path": "./snippets/javascript.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "typescript": "^3.3.1",
+    "vscode": "^1.1.28",
+    "tslint": "^5.12.1",
+    "@types/node": "^10.12.21",
+    "@types/mocha": "^2.2.42"
+  }
 }
