@@ -1,7 +1,7 @@
 {
   "name": "zpm",
   "displayName": "zpm",
-	"description": "自动为当前的Git库添加tag",
+  "description": "自动为当前的Git库添加tag",
   "keywords": [
     "zpm",
     "git",
@@ -13,7 +13,7 @@
   "engines": {
     "vscode": "^1.32.0"
   },
-	"homepage": "https://xuebin.me",
+  "homepage": "https://xuebin.me",
   "repository": {
     "type": "git",
     "url": "https://github.com/MrLeo/zpm-snippet.git"
@@ -26,29 +26,25 @@
     "onCommand:extension.tag"
   ],
   "contributes": {
-    "configuration": {
-      "type": "object",
-      "title": "vscode-plugin-demo",
-      "properties": {
-        "vscodePluginDemo.yourName": {
-          "type": "string",
-          "default": "guest",
-          "description": "Mr. Leo"
-        },
-        "vscodePluginDemo.showTip": {
-          "type": "boolean",
-          "default": true,
-          "description": "是否在每次启动时显示欢迎提示！"
-        }
-      }
-    },
     "commands": [
       {
-        "command": "extension.tag",
-        "title": "Hello World"
+        "command": "extension.tag.master",
+        "title": "tag: master"
+      },
+      {
+        "command": "extension.tag.pre",
+        "title": "tag: pre"
+      },
+      {
+        "command": "extension.tag.dev",
+        "title": "tag: dev"
+      },
+      {
+        "command": "extension.tag.all",
+        "title": "tag: all"
       }
-		],
-		"snippets": [
+    ],
+    "snippets": [
       {
         "language": "javascript",
         "path": "./snippets/javascript.json"
@@ -63,10 +59,12 @@
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
-    "typescript": "^3.3.1",
-    "vscode": "^1.1.28",
-    "tslint": "^5.12.1",
+    "@types/mocha": "^2.2.42",
     "@types/node": "^10.12.21",
-    "@types/mocha": "^2.2.42"
+    "semver": "^5.6.0",
+    "simple-git": "^1.107.0",
+    "tslint": "^5.12.1",
+    "typescript": "^3.3.1",
+    "vscode": "^1.1.28"
   }
 }
