@@ -23,28 +23,13 @@
   ],
   "main": "./out/extension.js",
   "activationEvents": [
-    "onCommand:extension.tag.master",
-    "onCommand:extension.tag.pre",
-    "onCommand:extension.tag.dev",
-    "onCommand:extension.tag.all"
+    "onCommand:extension.tag"
   ],
   "contributes": {
     "commands": [
       {
-        "command": "extension.tag.master",
-        "title": "tag: master"
-      },
-      {
-        "command": "extension.tag.pre",
-        "title": "tag: pre"
-      },
-      {
-        "command": "extension.tag.dev",
-        "title": "tag: dev"
-      },
-      {
-        "command": "extension.tag.all",
-        "title": "tag: all"
+        "command": "extension.tag",
+        "title": "🔖  创建Tag"
       }
     ],
     "snippets": [

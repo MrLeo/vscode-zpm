@@ -5,27 +5,106 @@
  * @version: 0.0.0
  * @Description:
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-14 10:04:13
+ * @LastEditTime: 2019-03-14 17:36:13
  */
-import { commands, Disposable } from 'vscode'
+
+import { commands, Disposable, workspace, window, WorkspaceFolder } from 'vscode'
 
 const git = require('simple-git/promise')(process.cwd())
-const envConfig = { master: 'version', pre: 'version_pre', dev: 'version_dev' } // 配置不同环境的version属性名
+const ENV = { master: 'version', pre: 'version_pre', dev: 'version_dev' } // 配置不同环境的version属性名
+
+// #region 环境列表选项
+export const COMMAND_DEFINITIONS: QuickPickItem[] = [
+  {
+    label: 'master',
+    description: '线上环境',
+  },
+  {
+    label: 'pre',
+    description: '预上线环境',
+  },
+  {
+    label: 'dev',
+    description: 'QA测试环境',
+  },
+  {
+    label: 'all',
+    description: '所有环境',
+  },
+]
+// #endregion
 
 // #region 接口声明
-interface Version {
+export interface Version {
   env?: string
   tag?: string
   version?: string
+}
+export interface QuickPickItem {
+  label: string
+  description?: string
+  path?: string
+}
+// #endregion
+
+// #region 显示选框
+async function showQuickPick(QuickPickList: QuickPickItem[]) {
+  return new Promise<QuickPickItem>((resolve, reject) => {
+    try {
+      window.showQuickPick(QuickPickList).then(command => {
+        console.log('TCL: Tag -> constructor -> command', command)
+        resolve(command)
+      })
+    } catch (err) {
+      console.log('TCL: catch -> err', err)
+      reject(err)
+    }
+  })
 }
 // #endregion
 
 export class Tag {
   private _disposable: Disposable
+  _env?: string = ''
+  _path?: string = ''
 
   constructor(command: string) {
-    this._disposable = commands.registerCommand(command, (...args) => {
+    this._disposable = commands.registerCommand(command, async (...args) => {
       console.log('TCL: Tag -> constructor -> args', args)
+      try {
+        // #region 获取目录列表
+        const workspaceFolders: WorkspaceFolder[] = workspace.workspaceFolders || []
+        console.log('TCL: Tag -> constructor -> folders', workspaceFolders)
+        const folders: QuickPickItem[] = workspaceFolders.map(folder => {
+          return {
+            label: folder.name,
+            path: folder.uri.path,
+          }
+        })
+        // #endregion
+
+        // #region 选择目录
+        if (folders.length > 0) {
+          if (folders.length === 1) {
+            this._path = folders[0].path
+          } else {
+            let commandFolder = await showQuickPick(folders)
+            console.log('TCL: Tag -> constructor -> 选择的目录', commandFolder)
+            this._path = commandFolder.path
+          }
+        }
+        // #endregion
+
+        // #region 选择环境
+        let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
+        console.log('TCL: Tag -> constructor -> 选择的环境', commandEnv)
+        this._env = commandEnv.label
+        // #endregion
+
+        console.log('TCL: Tag -> constructor -> path & env', this._path, this._env)
+      } catch (err) {
+        window.showErrorMessage(err.message)
+      }
     })
   }
 
@@ -52,7 +131,7 @@ export class Tag {
     }
 
     if (env === 'all') {
-      await Promise.all(Object.keys(envConfig).map(key => addTagSingle(key)))
+      await Promise.all(Object.keys(ENV).map(key => addTagSingle(key)))
     } else {
       await addTagSingle(env)
     }

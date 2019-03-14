@@ -2,10 +2,7 @@ import { ExtensionContext } from 'vscode'
 
 // #region 枚举命令
 export enum Commands {
-  master = 'extension.tag.master',
-  pre = 'extension.tag.pre',
-  dev = 'extension.tag.dev',
-  all = 'extension.tag.all',
+  tag = 'extension.tag',
 }
 // #endregion
 
