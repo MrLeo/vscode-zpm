@@ -19,7 +19,6 @@
     "body": [" // eslint-disable-next-line"],
     "description": "eslint忽略下一行"
   },
-
   "zpfe.init": {
     "prefix": "zpfe.init",
     "body": [
@@ -36,6 +35,7 @@
       "import qs from 'qs'",
       "import ZPError from '../../util/error'",
       "import { initHandler, errorHandler, throwIfMiss } from '../../util/'",
+      "import request from '../../util/request'",
       "",
       "async function POST (ctx) {",
       "  try {",
@@ -44,7 +44,7 @@
       "      loginUserId: init.loginUserId",
       "    }",
       "",
-      "    let { data: res } = await init.\\$fetch.post(`$2?${qs.stringify(params)}`)",
+      "    let { data: res } = await request(ctx).post(`$2?${qs.stringify(params)}`)",
       "",
       "    ctx.response.body = res",
       "    // ctx.response.set({ code: 200, data: res, message: res.message || '成功', taskId: res.taskId || ctx.request.headers.get('x-zp-request-id') })",
@@ -60,7 +60,7 @@
       "      loginUserId: init.loginUserId",
       "    }",
       "",
-      "    let { data: res } = await init.\\$fetch.get(`$2`, { params })",
+      "    let { data: res } = await request(ctx).get(`$2`, { params })",
       "",
       "    ctx.response.body = res",
       "    // ctx.response.set({ code: 200, data: res, message: res.message || '成功', taskId: res.taskId || ctx.request.headers.get('x-zp-request-id') })",
@@ -90,7 +90,6 @@
     ],
     "description": "使用ZPError抛出异常"
   },
-
   "Print to console": {
     "prefix": "cl",
     "body": ["console.log(`[$1]$2 -> $3`,$4)$5"],
