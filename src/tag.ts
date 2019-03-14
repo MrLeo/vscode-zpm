@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description:
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-13 20:21:33
+ * @LastEditTime: 2019-03-14 10:04:13
  */
 import { commands, Disposable } from 'vscode'
 
@@ -25,7 +25,7 @@ export class Tag {
 
   constructor(command: string) {
     this._disposable = commands.registerCommand(command, (...args) => {
-      console.log('TCL: AddTag -> constructor -> args', args)
+      console.log('TCL: Tag -> constructor -> args', args)
     })
   }
 

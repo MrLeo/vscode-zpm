@@ -23,7 +23,10 @@
   ],
   "main": "./out/extension.js",
   "activationEvents": [
-    "onCommand:extension.tag"
+    "onCommand:extension.tag.master",
+    "onCommand:extension.tag.pre",
+    "onCommand:extension.tag.dev",
+    "onCommand:extension.tag.all"
   ],
   "contributes": {
     "commands": [
