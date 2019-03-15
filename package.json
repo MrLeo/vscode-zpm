@@ -16,7 +16,7 @@
   "homepage": "https://xuebin.me",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MrLeo/zpm-snippet.git"
+    "url": "https://github.com/MrLeo/vscode-zpm.git"
   },
   "categories": [
     "Other"
