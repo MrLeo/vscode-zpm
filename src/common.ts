@@ -1,3 +1,13 @@
+/*
+ * @Company: 智联招聘
+ * @Author: xuebin.me
+ * @LastEditors: Leo
+ * @version: 0.0.0
+ * @Description: 通用方法
+ * @Date: 2019-03-13 20:17:45
+ * @LastEditTime: 2019-03-15 12:05:26
+ */
+
 import { ExtensionContext } from 'vscode'
 
 // #region 枚举命令

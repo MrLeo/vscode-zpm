@@ -1,3 +1,12 @@
+/*
+ * @Company: 智联招聘
+ * @Author: xuebin.me
+ * @LastEditors: Leo
+ * @version: 0.0.0
+ * @Description: 获取工程目录
+ * @Date: 2019-03-13 11:05:33
+ * @LastEditTime: 2019-03-15 12:05:51
+ */
 import * as vscode from 'vscode'
 
 const fs = require('fs')
