@@ -5,11 +5,11 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-15 15:02:32
+ * @LastEditTime: 2019-03-15 15:47:55
  */
 
-import { commands, Disposable, workspace, window, WorkspaceFolder } from 'vscode'
-import { command } from './common'
+import { commands, Disposable, window } from 'vscode'
+import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
 
 const simpleGit = require('simple-git/promise')
 
@@ -18,12 +18,6 @@ export interface Version {
   env?: string // 环境
   tag?: string // 标签
   version?: string // 版本号
-}
-export interface QuickPickItem {
-  label: string // 命令
-  description?: string // 命令描述
-  path?: string // 工程路径
-  versionName?: string // 配置不同环境的version属性名
 }
 // #endregion
 
@@ -51,27 +45,6 @@ export const COMMAND_DEFINITIONS: QuickPickItem[] = [
 ]
 // #endregion
 
-// #region 显示选框
-/**
- * 显示选框
- * @param {QuickPickItem[]} QuickPickList
- * @returns
- */
-async function showQuickPick(QuickPickList: QuickPickItem[]) {
-  return new Promise<QuickPickItem>((resolve, reject) => {
-    try {
-      window.showQuickPick(QuickPickList).then(command => {
-        console.log('TCL: Tag -> constructor -> command', command)
-        resolve(command)
-      })
-    } catch (err) {
-      console.log('TCL: catch -> err', err)
-      reject(err)
-    }
-  })
-}
-// #endregion
-
 @command()
 export class Tag {
   private _disposable: Disposable
@@ -87,8 +60,8 @@ export class Tag {
     return this._git
   }
 
-  constructor(command: string) {
-    this._disposable = commands.registerCommand(command, async (...args) => {
+  constructor() {
+    this._disposable = commands.registerCommand(Commands.tag, async (...args) => {
       console.log('TCL: Tag -> constructor -> args', args)
       try {
         await this.quickPickPath()
@@ -104,31 +77,13 @@ export class Tag {
     })
   }
 
-  // #region 获取目录列表
-  /**
-   * 获取目录列表
-   * @memberof Tag
-   */
-  getWorkspaceFolders() {
-    const workspaceFolders: WorkspaceFolder[] = workspace.workspaceFolders || []
-    console.log('TCL: Tag -> getWorkspaceFolders -> workspaceFolders', workspaceFolders)
-    console.log('TCL: Tag -> getWorkspaceFolders -> vscode.workspace.rootPath', workspace.rootPath)
-    this._folders = workspaceFolders.map(folder => {
-      return {
-        label: folder.name,
-        path: folder.uri.path,
-      }
-    })
-  }
-  // #endregion
-
   // #region 选择目录
   /**
    * 选择目录
    * @memberof Tag
    */
   async quickPickPath() {
-    this.getWorkspaceFolders()
+    this._folders = getWorkspaceFolders()
 
     if (this._folders.length > 0) {
       if (this._folders.length === 1) {
@@ -150,7 +105,6 @@ export class Tag {
   async quickPickEnv() {
     let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
     console.log('TCL: Tag -> quickPickEnv -> 选择的环境', commandEnv)
-    console.log('TCL: Tag -> constructor -> 选择的环境', commandEnv)
     this._env = commandEnv.label
   }
   // #endregion
@@ -175,7 +129,7 @@ export class Tag {
       let lastVsersion = lastTag.split('-')[1].substring(1)
       let version = await this.generateNewTag(envName, lastVsersion)
       // log(chalk`{gray 🏷  生成最新的Tag: ${version.tag}}`)
-      await this.createTag([version])
+      await this.addTag([version])
     }
 
     return env === 'all'
@@ -205,13 +159,13 @@ export class Tag {
   }
   // #endregion
 
-  // #region 创建Tag
+  // #region 添加Tag
   /**
-   * 创建Tag
+   * 添加Tag
    * @param {Array<Version>} versions
    * @memberof Tag
    */
-  async createTag(versions: Array<Version>) {
+  async addTag(versions: Array<Version>) {
     // log(chalk`{green 🔀  更新本地仓库}`)
     await this.git.pull({ '--rebase': 'true' })
 
