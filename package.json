@@ -49,10 +49,13 @@
   "devDependencies": {
     "@types/mocha": "^2.2.42",
     "@types/node": "^10.12.21",
-    "semver": "^5.6.0",
-    "simple-git": "^1.107.0",
     "tslint": "^5.12.1",
     "typescript": "^3.3.1",
     "vscode": "^1.1.28"
+  },
+  "dependencies": {
+    "semver": "^5.6.0",
+    "simple-git": "^1.107.0",
+    "dayjs": "^1.8.10"
   }
 }

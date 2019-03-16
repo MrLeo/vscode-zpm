@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-16 12:18:58
+ * @LastEditTime: 2019-03-16 13:20:11
  */
 
 import { commands, Disposable, window } from 'vscode'
@@ -13,6 +13,7 @@ import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } 
 
 const simpleGit = require('simple-git/promise')
 const semver = require('semver')
+const dayjs = require('dayjs')
 
 // #region 接口声明
 export interface Version {
@@ -212,7 +213,7 @@ export class Tag {
       // const major = semver.major(version)
       const minor = semver.minor(version)
       const patch = semver.patch(version)
-      const date = formatTime(new Date(), '{y}{m}{d}')
+      const date = dayjs().format('YYYYMMDD')
       const config = { env, version, tag: `${env}-v${version}-${date}` }
       if (patch >= 99) {
         config.version = semver.inc(version, 'minor')
@@ -227,52 +228,3 @@ export class Tag {
   }
   // #endregion
 }
-
-// #region 格式化时间
-/**
- * 格式化时间
- *
- * @param  {time} 时间
- * @param  {cFormat} 格式
- * @return {String} 字符串
- *
- * @example formatTime('2018-1-29', '{y}/{m}/{d} {h}:{i}:{s}') // -> 2018/01/29 00:00:00
- */
-function formatTime(time: string | number | Date, cFormat: string): string {
-  if (arguments.length === 0) {
-    return ''
-  }
-  if (`${time}`.length === 10) {
-    time = +time * 1000
-  }
-
-  const format = cFormat || '{y}-{m}-{d} {h}:{i}:{s}'
-  let date
-  if (typeof time === 'object') {
-    date = time
-  } else {
-    date = new Date(time)
-  }
-
-  const formatObj: any = {
-    y: date.getFullYear(),
-    m: date.getMonth() + 1,
-    d: date.getDate(),
-    h: date.getHours(),
-    i: date.getMinutes(),
-    s: date.getSeconds(),
-    a: date.getDay(),
-  }
-  const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
-    let value = formatObj[key]
-    if (key === 'a') {
-      return ['一', '二', '三', '四', '五', '六', '日'][value - 1]
-    }
-    if (result.length > 0 && value < 10) {
-      value = `0${value}`
-    }
-    return value || 0
-  })
-  return time_str
-}
-// #endregion
