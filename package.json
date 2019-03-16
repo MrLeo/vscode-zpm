@@ -1,11 +1,12 @@
 {
   "name": "zpm",
   "displayName": "zpm",
-  "description": "自动为当前的Git库添加tag",
+  "description": "ZPM vscode 插件",
   "keywords": [
     "zpm",
     "git",
-    "tag"
+    "tag",
+    "snippets"
   ],
   "version": "0.0.6",
   "publisher": "MrLeo",
