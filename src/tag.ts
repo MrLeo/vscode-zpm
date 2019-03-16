@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-16 16:36:59
+ * @LastEditTime: 2019-03-16 16:47:50
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -168,7 +168,7 @@ export class Tag {
               }),
           )
           console.log('TCL: Tag -> addTagSingle -> versions', versions)
-          window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n${versions.join('    /    ')}`)
+          window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`    /    `)}`)
           let version = await this.generateNewTag(envName, lastVsersion)
           progress.report({ message: `生成新版本号: ${JSON.stringify(version)}` })
           await this.addTag([version])
