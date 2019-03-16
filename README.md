@@ -2,6 +2,12 @@
 
 > 应用商店地址: [https://marketplace.visualstudio.com/items?itemName=MrLeo.zpm](https://marketplace.visualstudio.com/items?itemName=MrLeo.zpm)
 
+# 创建 tag
+
+为 git 仓库创建格式为 {环境}-v{版本号}-{日期} 的 tag，如：pre-v0.0.1-20190315
+
+![](https://ws2.sinaimg.cn/large/006tKfTcly1g14herrdizg30so0llgrk.gif)
+
 # 代码片段
 
 ## javascript
@@ -109,13 +115,9 @@
 
   ```javascript
   console.groupCollapsed(`------------------> $1 <------------------`)
-  console.log(`[$2]$3 -> $4`,$5)$6
+  console.log(`[${2:LOG}]$3 -> $4`,$5)$6
   console.groupEnd()
   ```
-
-# 创建 tag
-
-为 git 仓库创建格式为 {环境}-v{版本号}-{日期} 的 tag，如：pre-v0.0.1-20190315
 
 # 参考：
 

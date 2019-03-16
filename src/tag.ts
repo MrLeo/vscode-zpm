@@ -5,13 +5,14 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-15 15:47:55
+ * @LastEditTime: 2019-03-16 11:42:02
  */
 
 import { commands, Disposable, window } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
 
 const simpleGit = require('simple-git/promise')
+const semver = require('semver')
 
 // #region 接口声明
 export interface Version {
@@ -122,13 +123,35 @@ export class Tag {
     const tags = await this.git.tags()
 
     let addTagSingle = async (envName: string) => {
-      const reg = new RegExp(`^${envName}`)
-      let envTags = tags.all.filter((tag: string) => reg.test(tag))
-      let lastTag = envTags[envTags.length - 1] || `${envName}-v0.0.0-19000101`
-      // log(chalk`{gray 🏷  仓库最新的Tag: ${lastTag}}`)
-      let lastVsersion = lastTag.split('-')[1].substring(1)
+      // 当前环境的最大版本号
+      let lastVsersion = '0.0.0'
+      // 当前环境的版本号列表过滤
+      let versions = tags.all.filter(
+        (item: any) =>
+          !!item.replace(/^(dev.*|qa|pre|master)-v((\d+\.?)+)-(\d{8})$/gi, (...arg: any) => {
+            let matchStr = arg[0] || ''
+            let tagEnv = arg[1] || ''
+
+            // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是dev
+            if (envName === 'dev' && /dev.*|qa/.test(tagEnv)) {
+              envName = tagEnv
+            }
+            if (tagEnv !== envName) {
+              return ''
+            }
+
+            // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
+            let tagVersion =
+              semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1'))) || lastVsersion
+
+            // 比较版本号，记录最大版本号
+            lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
+            return matchStr
+          }),
+      )
+      console.log('TCL: Tag -> addTagSingle -> versions', versions)
+      window.showInformationMessage(`🏷 当前环境的版本号列表:\n${versions.join('\n')}`)
       let version = await this.generateNewTag(envName, lastVsersion)
-      // log(chalk`{gray 🏷  生成最新的Tag: ${version.tag}}`)
       await this.addTag([version])
     }
 
@@ -142,19 +165,17 @@ export class Tag {
   }
   // #endregion
 
-  // #region commit 所有未提交的文件
+  // #region commit 提交所有未提交的文件
   /**
-   * commit 所有未提交的文件
+   * commit 提交所有未提交的文件
    * @memberof Tag
    */
   async commitAllFiles() {
     let statusSummary = await this.git.status()
     if (statusSummary.files.length) {
-      // log(chalk`{red 🚨  有未提交的文件变更}`)
-      // log(chalk`{gray ➕  暂存未提交的文件变更}`)
       await this.git.add('./*')
-      // log(chalk`{gray ✔️  提交未提交的文件变更}`)
-      await this.git.commit('🚀')
+      await this.git.commit('🚀🔖')
+      window.showInformationMessage('🚨 有未提交的文件变更已提交')
     }
   }
   // #endregion
@@ -166,12 +187,11 @@ export class Tag {
    * @memberof Tag
    */
   async addTag(versions: Array<Version>) {
-    // log(chalk`{green 🔀  更新本地仓库}`)
     await this.git.pull({ '--rebase': 'true' })
 
     versions.forEach(async (version: Version) => {
-      // log(chalk`{green 🏷  创建标签 ${version.tag}}`)
-      await this.git.addTag(version.tag)
+      // await this.git.addTag(version.tag) // TODO 测试禁用创建Tag
+      window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`)
     })
   }
   // #endregion
@@ -180,13 +200,12 @@ export class Tag {
   /**
    * 生成新Tag
    * @param {string} [env='pre']  master|pre|dev|all
-   * @param {string} [version='0.0.0']
-   * @returns
+   * @param {string} [version='0.0.0'] 前一个版本号
+   * @returns [version='0.0.1'] 新版本号
    * @memberof Tag
    */
   generateNewTag(env: string = 'pre', version: string = '0.0.0') {
     return new Promise(resolve => {
-      const semver = require('semver')
       // const major = semver.major(version)
       const minor = semver.minor(version)
       const patch = semver.patch(version)
@@ -201,20 +220,6 @@ export class Tag {
       }
       config.tag = `${env}-v${config.version}-${date}`
       resolve(config)
-
-      // const Bump = require('bump-regex') // 为git的version添加自动增长版本号组件
-      // Bump(`version:${version}`, (err, out) => {
-      //   if (out) {
-      //     const date = formatTime(new Date(), '{y}{m}{d}')
-      //     resolve({
-      //       env,
-      //       version: out.new,
-      //       tag: `${env}-v${out.new}-${date}`
-      //     })
-      //   } else {
-      //     reject(err)
-      //   }
-      // })
     })
   }
   // #endregion
