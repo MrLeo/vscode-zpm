@@ -2,6 +2,12 @@
 
 > 应用商店地址: [https://marketplace.visualstudio.com/items?itemName=MrLeo.zpm](https://marketplace.visualstudio.com/items?itemName=MrLeo.zpm)
 
+# 参考地址
+
+- [插件市场](https://marketplace.visualstudio.com/) / [插件管理](https://marketplace.visualstudio.com/manage)
+- [vscode 插件开发](https://xuebin.me/posts/a0508b9c.html)
+- [vscode api](https://code.visualstudio.com/api/references/vscode-api)
+
 # 创建 tag
 
 为 git 仓库当前分支版本创建格式为 {环境}-v{版本号}-{日期} 的 tag，如：pre-v0.0.1-20190315
@@ -118,8 +124,3 @@
   console.log(`[${2:LOG}]$3 -> $4`,$5)$6
   console.groupEnd()
   ```
-
-# 参考：
-
-- [插件市场](https://marketplace.visualstudio.com/) / [插件管理](https://marketplace.visualstudio.com/manage)
-- [vscode 插件开发](https://xuebin.me/posts/a0508b9c.html)
