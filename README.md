@@ -4,7 +4,7 @@
 
 # 创建 tag
 
-为 git 仓库创建格式为 {环境}-v{版本号}-{日期} 的 tag，如：pre-v0.0.1-20190315
+为 git 仓库当前分支版本创建格式为 {环境}-v{版本号}-{日期} 的 tag，如：pre-v0.0.1-20190315
 
 ![](https://ws2.sinaimg.cn/large/006tKfTcly1g14herrdizg30so0llgrk.gif)
 

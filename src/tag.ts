@@ -5,10 +5,10 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-16 13:20:11
+ * @LastEditTime: 2019-03-16 16:11:58
  */
 
-import { commands, Disposable, window } from 'vscode'
+import { commands, Disposable, window, ProgressLocation } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
 
 const simpleGit = require('simple-git/promise')
@@ -118,54 +118,71 @@ export class Tag {
    * @memberof Tag
    */
   async addTagByTags(env: string) {
-    // const tags = fs.readdirSync('./.git/refs/tags'); // 同步版本的readdir
-    await this.commitAllFiles()
-    await this.git.pull({ '--rebase': 'true' })
-    const tags = await this.git.tags()
+    window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: '创建Tag',
+        cancellable: true,
+      },
+      async (progress, token) => {
+        token.onCancellationRequested(() => {
+          window.showInformationMessage(`🏷 取消创建`)
+        })
 
-    let addTagSingle = async (envName: string) => {
-      // 当前环境的最大版本号
-      let lastVsersion = '0.0.0'
-      // 当前环境的版本号列表过滤
-      let versions = tags.all.filter(
-        (item: any) =>
-          !!item.replace(/^(dev.*|qa|pre|master)-v((\d+\.?)+)-(\d{8})$/gi, (...arg: any) => {
-            let matchStr = arg[0] || ''
-            let tagEnv = arg[1] || ''
+        progress.report({ increment: 10, message: '获取所有tag' })
+        // const tags = fs.readdirSync('./.git/refs/tags'); // 同步版本的readdir
+        await this.commitAllFiles()
+        await this.git.pull({ '--rebase': 'true' })
+        const tags = await this.git.tags()
 
-            // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是dev
-            if (envName === 'dev' && /dev.*|qa/.test(tagEnv)) {
-              envName = tagEnv
-            }
-            if (tagEnv !== envName) {
-              return ''
-            }
+        let addTagSingle = async (envName: string) => {
+          // 当前环境的最大版本号
+          let lastVsersion = '0.0.0'
+          // 当前环境的版本号列表过滤
+          let versions = tags.all.filter(
+            (item: any) =>
+              !!item.replace(/^(dev.*|qa|pre|master)-v((\d+\.?)+)-(\d{8})$/gi, (...arg: any) => {
+                let matchStr = arg[0] || ''
+                let tagEnv = arg[1] || ''
 
-            // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
-            let tagVersion =
-              semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1'))) || lastVsersion
+                progress.report({ message: `格式化版本号: ${matchStr}` })
 
-            // 比较版本号，记录最大版本号
-            lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
-            return matchStr
-          }),
-      )
-      console.log('TCL: Tag -> addTagSingle -> versions', versions)
-      window.showInformationMessage(
-        `🏷 当前环境的版本号列表:\n\t${versions.join('\n\t')}`,
-        ...versions,
-      )
-      let version = await this.generateNewTag(envName, lastVsersion)
-      await this.addTag([version])
-    }
+                // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是dev
+                if (envName === 'dev' && /dev.*|qa/.test(tagEnv)) {
+                  envName = tagEnv
+                }
+                if (tagEnv !== envName) {
+                  return ''
+                }
 
-    return env === 'all'
-      ? await Promise.all(
-          COMMAND_DEFINITIONS.map(item =>
-            item.versionName ? addTagSingle(item.label) : Promise.resolve(),
-          ),
-        )
-      : [await addTagSingle(env)]
+                // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
+                progress.report({ message: `格式化版本号: ${matchStr}` })
+                let tagVersion =
+                  semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1'))) ||
+                  lastVsersion
+
+                // 比较版本号，记录最大版本号
+                progress.report({ message: `比较版本号: ${tagVersion} & ${lastVsersion}` })
+                lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
+                return matchStr
+              }),
+          )
+          console.log('TCL: Tag -> addTagSingle -> versions', versions)
+          window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n${versions.join('    /    ')}`)
+          let version = await this.generateNewTag(envName, lastVsersion)
+          progress.report({ message: `生成新版本号: ${JSON.stringify(version)}` })
+          await this.addTag([version])
+        }
+
+        return env === 'all'
+          ? await Promise.all(
+              COMMAND_DEFINITIONS.map(item =>
+                item.versionName ? addTagSingle(item.label) : Promise.resolve(),
+              ),
+            )
+          : [await addTagSingle(env)]
+      },
+    )
   }
   // #endregion
 
@@ -196,6 +213,7 @@ export class Tag {
     versions.forEach(async (version: Version) => {
       await this.git.addTag(version.tag)
       window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
+      await this.git.push()
     })
   }
   // #endregion
