@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-16 16:11:58
+ * @LastEditTime: 2019-03-16 16:36:59
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -141,7 +141,7 @@ export class Tag {
           // 当前环境的版本号列表过滤
           let versions = tags.all.filter(
             (item: any) =>
-              !!item.replace(/^(dev.*|qa|pre|master)-v((\d+\.?)+)-(\d{8})$/gi, (...arg: any) => {
+              !!item.replace(/^(\w+)-v((\d+\.?)+)-(\d{8})$/gi, (...arg: any) => {
                 let matchStr = arg[0] || ''
                 let tagEnv = arg[1] || ''
 
