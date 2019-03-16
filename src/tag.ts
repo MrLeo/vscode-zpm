@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-16 11:42:02
+ * @LastEditTime: 2019-03-16 12:18:58
  */
 
 import { commands, Disposable, window } from 'vscode'
@@ -150,7 +150,10 @@ export class Tag {
           }),
       )
       console.log('TCL: Tag -> addTagSingle -> versions', versions)
-      window.showInformationMessage(`🏷 当前环境的版本号列表:\n${versions.join('\n')}`)
+      window.showInformationMessage(
+        `🏷 当前环境的版本号列表:\n\t${versions.join('\n\t')}`,
+        ...versions,
+      )
       let version = await this.generateNewTag(envName, lastVsersion)
       await this.addTag([version])
     }
@@ -175,7 +178,7 @@ export class Tag {
     if (statusSummary.files.length) {
       await this.git.add('./*')
       await this.git.commit('🚀🔖')
-      window.showInformationMessage('🚨 有未提交的文件变更已提交')
+      window.showWarningMessage('🚨 有未提交的文件变更已提交')
     }
   }
   // #endregion
@@ -190,8 +193,8 @@ export class Tag {
     await this.git.pull({ '--rebase': 'true' })
 
     versions.forEach(async (version: Version) => {
-      // await this.git.addTag(version.tag) // TODO 测试禁用创建Tag
-      window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`)
+      await this.git.addTag(version.tag)
+      window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
     })
   }
   // #endregion
