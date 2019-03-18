@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 17:59:54
+ * @LastEditTime: 2019-03-18 18:43:25
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -159,11 +159,16 @@ export class Tag {
           // const tags = fs.readdirSync('./.git/refs/tags'); // 同步版本的readdir
           logger('开始检查是否有未提交的变更')
           await this.commitAllFiles()
+
           logger('开始拉取最新的变更')
-          await this.git.pull({ '--rebase': 'true' })
+          let pull = await this.git.pull({ '--rebase': 'true' })
+          log.appendLine('> git pull --rebase')
+          log.appendLine(JSON.stringify(pull))
+
           logger('开始获取所有tag')
           const tags = await this.git.tags()
-          logger(`git tags: ${JSON.stringify(tags)}`)
+          logger(`> git tags`)
+          logger(JSON.stringify(tags))
           // #endregion
 
           // #region addTagSingle
@@ -231,9 +236,16 @@ export class Tag {
   async commitAllFiles() {
     try {
       let statusSummary = await this.git.status()
+      console.log('TCL: commitAllFiles -> statusSummary', statusSummary)
+      log.appendLine(`> git status`)
+      log.appendLine(JSON.stringify(statusSummary))
       if (statusSummary.files.length) {
-        await this.git.add('./*')
-        await this.git.commit('🚀🔖')
+        let add = await this.git.add('./*')
+        log.appendLine('> git add')
+        log.appendLine(JSON.stringify(add))
+        let commit = await this.git.commit('🚀🔖')
+        log.appendLine('> git commit')
+        log.appendLine(JSON.stringify(commit))
         window.showWarningMessage('🚨 有未提交的文件变更已提交')
       }
     } catch (error) {
