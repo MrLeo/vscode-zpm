@@ -5,16 +5,16 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 20:29:02
+ * @LastEditTime: 2019-03-18 20:45:42
  */
 
 import { commands, Disposable, window, ProgressLocation, StatusBarAlignment } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
+// import * as child_process from 'child_process'
+import * as fs from 'fs'
 import * as simpleGit from 'simple-git/promise'
-// const simpleGit = require('simple-git/promise')
-const fs = require('fs')
-const semver = require('semver')
-const dayjs = require('dayjs')
+import * as semver from 'semver'
+import * as dayjs from 'dayjs'
 
 const log = window.createOutputChannel('zpm/log')
 log.show()
@@ -178,8 +178,8 @@ export class Tag {
           log.appendLine(JSON.stringify(pull))
 
           logger('开始获取所有tag')
-          // const tags = await this.git.tags()
           const tags = fs.readdirSync(`${this._path}/.git/refs/tags`)
+          // const tags = await this.git.tags()
           logger(`> git tags`)
           logger(JSON.stringify(tags))
           // #endregion
@@ -208,7 +208,7 @@ export class Tag {
                       // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
                       logger(`格式化版本号: ${matchStr}`)
                       let tagVersion =
-                        semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1'))) ||
+                        semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1')) || '') ||
                         lastVsersion
 
                       // 比较版本号，记录最大版本号
@@ -312,11 +312,11 @@ export class Tag {
         const date = dayjs().format('YYYYMMDD')
         const config = { env, version, tag: `${env}-v${version}-${date}` }
         if (patch >= 99) {
-          config.version = semver.inc(version, 'minor')
+          config.version = semver.inc(version, 'minor') || '0.0.0'
         } else if (minor >= 99) {
-          config.version = semver.inc(version, 'major')
+          config.version = semver.inc(version, 'major') || '0.0.0'
         } else {
-          config.version = semver.inc(version, 'patch')
+          config.version = semver.inc(version, 'patch') || '0.0.0'
         }
         config.tag = `${env}-v${config.version}-${date}`
         resolve(config)
