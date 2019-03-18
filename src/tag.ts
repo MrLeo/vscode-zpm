@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 20:54:36
+ * @LastEditTime: 2019-03-18 21:00:07
  */
 
 import { commands, Disposable, window, ProgressLocation, StatusBarAlignment } from 'vscode'
@@ -67,7 +67,7 @@ export class Tag {
   }
 
   constructor() {
-    let tagBtn = window.createStatusBarItem(StatusBarAlignment.Left, 4.5)
+    let tagBtn = window.createStatusBarItem(StatusBarAlignment.Left)
     tagBtn.command = Commands.tag
     tagBtn.text = `$(tag)`
     tagBtn.tooltip = '创建tag'
