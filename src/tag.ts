@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 18:43:25
+ * @LastEditTime: 2019-03-18 18:51:33
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -154,6 +154,13 @@ export class Tag {
           token.onCancellationRequested(() => {
             window.showInformationMessage(`🏷 取消创建`)
           })
+
+          let remotes = await this.git.listRemote()
+          log.appendLine('> git remote')
+          log.appendLine(JSON.stringify(remotes))
+          let logs = await this.git.log()
+          log.appendLine('> git log')
+          log.appendLine(JSON.stringify(logs))
 
           // #region 获取tag列表
           // const tags = fs.readdirSync('./.git/refs/tags'); // 同步版本的readdir
