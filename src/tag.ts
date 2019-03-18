@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 17:46:33
+ * @LastEditTime: 2019-03-18 17:53:01
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -68,7 +68,7 @@ export class Tag {
   constructor() {
     this._disposable = commands.registerCommand(Commands.tag, async (...args) => {
       console.log('TCL: Tag -> constructor -> args', args)
-      log.append('注册插件')
+      log.appendLine('注册插件')
       try {
         await this.quickPickPath()
         await this.quickPickEnv()
@@ -77,11 +77,11 @@ export class Tag {
         this._env && (await this.addTagByTags(this._env))
 
         console.log('TCL: Tag -> constructor -> path & env', this._path, this._env)
-        log.append(`env: ${this._env}`)
-        log.append(`path: ${this._path}`)
+        log.appendLine(`env: ${this._env}`)
+        log.appendLine(`path: ${this._path}`)
       } catch (err) {
         console.log('TCL: registerCommand -> error', err)
-        log.append(`error: ${err.message}`)
+        log.appendLine(`error: ${err.message}`)
         window.showErrorMessage(err.message)
       }
     })
@@ -102,13 +102,13 @@ export class Tag {
         } else {
           let commandFolder = await showQuickPick(this._folders)
           console.log('TCL: Tag -> quickPickPath -> 选择的目录', commandFolder)
-          log.append(`选择的目录: ${JSON.stringify(commandFolder)}`)
+          log.appendLine(`选择的目录: ${JSON.stringify(commandFolder)}`)
           this._path = commandFolder.path
         }
       }
     } catch (error) {
       console.log('TCL: quickPickPath -> error', error)
-      log.append(`error: ${error.message}`)
+      log.appendLine(`error: ${error.message}`)
     }
   }
   // #endregion
@@ -122,11 +122,11 @@ export class Tag {
     try {
       let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
       console.log('TCL: Tag -> quickPickEnv -> 选择的环境', commandEnv)
-      log.append(`选择的环境: ${JSON.stringify(commandEnv)}`)
+      log.appendLine(`选择的环境: ${JSON.stringify(commandEnv)}`)
       this._env = commandEnv.label
     } catch (error) {
       console.log('TCL: quickPickEnv -> error', error)
-      log.append(`error: ${error.message}`)
+      log.appendLine(`error: ${error.message}`)
     }
   }
   // #endregion
@@ -147,7 +147,7 @@ export class Tag {
       async (progress, token) => {
         const logger = (text: string) => {
           progress.report({ message: text })
-          log.append(text)
+          log.appendLine(text)
         }
 
         try {
@@ -163,6 +163,7 @@ export class Tag {
           await this.git.pull({ '--rebase': 'true' })
           logger('开始获取所有tag')
           const tags = await this.git.tags()
+          logger(`git tags: ${JSON.stringify(tags)}`)
           // #endregion
 
           // #region addTagSingle
@@ -237,7 +238,7 @@ export class Tag {
       }
     } catch (error) {
       console.log('TCL: commitAllFiles -> error', error)
-      log.append(`error: ${error.message}`)
+      log.appendLine(`error: ${error.message}`)
     }
   }
   // #endregion
@@ -259,7 +260,7 @@ export class Tag {
       })
     } catch (error) {
       console.log('TCL: addTag -> error', error)
-      log.append(`error: ${error.message}`)
+      log.appendLine(`error: ${error.message}`)
     }
   }
   // #endregion
@@ -291,7 +292,7 @@ export class Tag {
         resolve(config)
       } catch (error) {
         console.log('TCL: generateNewTag -> error', error)
-        log.append(`error: ${error.message}`)
+        log.appendLine(`error: ${error.message}`)
         reject(error)
       }
     })
