@@ -5,10 +5,10 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 20:22:11
+ * @LastEditTime: 2019-03-18 20:29:02
  */
 
-import { commands, Disposable, window, ProgressLocation } from 'vscode'
+import { commands, Disposable, window, ProgressLocation, StatusBarAlignment } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
 import * as simpleGit from 'simple-git/promise'
 // const simpleGit = require('simple-git/promise')
@@ -67,6 +67,12 @@ export class Tag {
   }
 
   constructor() {
+    let tagBtn = window.createStatusBarItem(StatusBarAlignment.Left, 4.5)
+    tagBtn.command = Commands.tag
+    tagBtn.text = `tag`
+    tagBtn.tooltip = '创建tag'
+    tagBtn.show()
+
     this._disposable = commands.registerCommand(Commands.tag, async (...args) => {
       console.log('TCL: Tag -> constructor -> args', args)
       log.appendLine('register command')
