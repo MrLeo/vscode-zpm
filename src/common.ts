@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 通用方法
  * @Date: 2019-03-13 20:17:45
- * @LastEditTime: 2019-03-15 15:45:57
+ * @LastEditTime: 2019-03-18 17:35:13
  */
 
 import { ExtensionContext, window, workspace, WorkspaceFolder } from 'vscode'
@@ -52,7 +52,7 @@ export enum Commands {
 }
 // #endregion
 
-// #region QuickPickItem: 接口 - 可选列表项数据结构
+// #region QuickPickItem: 接口 - 输入选项数据结构
 export interface QuickPickItem {
   label: string // 命令
   description?: string // 命令描述
@@ -61,9 +61,9 @@ export interface QuickPickItem {
 }
 // #endregion
 
-// #region showQuickPick: 显示可选项列表
+// #region showQuickPick: 显示输入选项
 /**
- * 显示选框
+ * 显示输入选项
  * @param {QuickPickItem[]} QuickPickList
  * @returns
  */
