@@ -5,13 +5,14 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 19:58:30
+ * @LastEditTime: 2019-03-18 20:22:11
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
 import * as simpleGit from 'simple-git/promise'
 // const simpleGit = require('simple-git/promise')
+const fs = require('fs')
 const semver = require('semver')
 const dayjs = require('dayjs')
 
@@ -162,7 +163,6 @@ export class Tag {
           log.appendLine(JSON.stringify(logs))
 
           // #region 获取tag列表
-          // const tags = fs.readdirSync('./.git/refs/tags'); // 同步版本的readdir
           logger('开始检查是否有未提交的变更')
           await this.commitAllFiles()
 
@@ -172,7 +172,8 @@ export class Tag {
           log.appendLine(JSON.stringify(pull))
 
           logger('开始获取所有tag')
-          const tags = await this.git.tags()
+          // const tags = await this.git.tags()
+          const tags = fs.readdirSync(`${this._path}/.git/refs/tags`)
           logger(`> git tags`)
           logger(JSON.stringify(tags))
           // #endregion
