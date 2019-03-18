@@ -5,10 +5,10 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 21:02:01
+ * @LastEditTime: 2019-03-18 21:08:45
  */
 
-import { commands, Disposable, window, ProgressLocation, StatusBarAlignment } from 'vscode'
+import { commands, Disposable, window, ProgressLocation } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
 // import * as child_process from 'child_process'
 import * as fs from 'fs'
@@ -68,12 +68,6 @@ export class Tag {
 
   constructor() {
     this._disposable = commands.registerCommand(Commands.tag, async (...args) => {
-      let tagBtn = window.createStatusBarItem(StatusBarAlignment.Left)
-      tagBtn.command = Commands.tag
-      tagBtn.text = `$(tag)`
-      tagBtn.tooltip = '创建tag'
-      tagBtn.show()
-
       console.log('TCL: Tag -> constructor -> args', args)
       log.appendLine('register command')
       try {
