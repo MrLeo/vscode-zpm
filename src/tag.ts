@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 20:45:42
+ * @LastEditTime: 2019-03-18 20:49:46
  */
 
 import { commands, Disposable, window, ProgressLocation, StatusBarAlignment } from 'vscode'
@@ -179,7 +179,7 @@ export class Tag {
 
           logger('开始获取所有tag')
           const tags = fs.readdirSync(`${this._path}/.git/refs/tags`)
-          // const tags = await this.git.tags()
+          // const tags = (await this.git.tags()).all
           logger(`> git tags`)
           logger(JSON.stringify(tags))
           // #endregion
@@ -190,8 +190,8 @@ export class Tag {
             let lastVsersion = '0.0.0'
 
             // 当前环境的版本号列表过滤
-            let versions = tags.all
-              ? tags.all.filter(
+            let versions = tags
+              ? tags.filter(
                   (item: any) =>
                     !!item.replace(/^(\w+)-v((\d+\.?)+)-(\d{8})$/gi, (...arg: any) => {
                       let matchStr = arg[0] || ''
