@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 18:51:33
+ * @LastEditTime: 2019-03-18 19:58:30
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -151,13 +151,12 @@ export class Tag {
         }
 
         try {
-          token.onCancellationRequested(() => {
-            window.showInformationMessage(`🏷 取消创建`)
-          })
+          token.onCancellationRequested(() => window.showInformationMessage(`🏷 取消创建`))
 
           let remotes = await this.git.listRemote()
           log.appendLine('> git remote')
           log.appendLine(JSON.stringify(remotes))
+
           let logs = await this.git.log()
           log.appendLine('> git log')
           log.appendLine(JSON.stringify(logs))
@@ -182,39 +181,42 @@ export class Tag {
           let addTagSingle = async (envName: string) => {
             // 当前环境的最大版本号
             let lastVsersion = '0.0.0'
+
             // 当前环境的版本号列表过滤
-            let versions = tags.all.filter(
-              (item: any) =>
-                !!item.replace(/^(\w+)-v((\d+\.?)+)-(\d{8})$/gi, (...arg: any) => {
-                  let matchStr = arg[0] || ''
-                  let tagEnv = arg[1] || ''
+            let versions = tags.all
+              ? tags.all.filter(
+                  (item: any) =>
+                    !!item.replace(/^(\w+)-v((\d+\.?)+)-(\d{8})$/gi, (...arg: any) => {
+                      let matchStr = arg[0] || ''
+                      let tagEnv = arg[1] || ''
 
-                  // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是dev
-                  if (envName === 'dev' && /dev.*|qa/.test(tagEnv)) {
-                    envName = tagEnv
-                  }
-                  if (tagEnv !== envName) {
-                    return ''
-                  }
+                      // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是dev
+                      if (envName === 'dev' && /dev.*|qa/.test(tagEnv)) {
+                        envName = tagEnv
+                      }
+                      if (tagEnv !== envName) {
+                        return ''
+                      }
 
-                  // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
-                  logger(`格式化版本号: ${matchStr}`)
-                  let tagVersion =
-                    semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1'))) ||
-                    lastVsersion
+                      // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
+                      logger(`格式化版本号: ${matchStr}`)
+                      let tagVersion =
+                        semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1'))) ||
+                        lastVsersion
 
-                  // 比较版本号，记录最大版本号
-                  logger(`比较版本号: ${tagVersion} & ${lastVsersion}`)
-                  lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
-                  return matchStr
-                }),
-            )
+                      // 比较版本号，记录最大版本号
+                      logger(`比较版本号: ${tagVersion} & ${lastVsersion}`)
+                      lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
+                      return matchStr
+                    }),
+                )
+              : [lastVsersion]
             console.log('TCL: Tag -> addTagSingle -> versions', versions)
-            window.showInformationMessage(
-              `🏷 当前环境的版本号列表:\r\n ${versions.join(`    /    `)}`,
-            )
+            window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`  /  `)}`)
+
             let version = await this.generateNewTag(envName, lastVsersion)
             logger(`生成新版本号: ${JSON.stringify(version)}`)
+
             await this.addTag([version])
           }
           // #endregion
@@ -250,9 +252,11 @@ export class Tag {
         let add = await this.git.add('./*')
         log.appendLine('> git add')
         log.appendLine(JSON.stringify(add))
+
         let commit = await this.git.commit('🚀🔖')
         log.appendLine('> git commit')
         log.appendLine(JSON.stringify(commit))
+
         window.showWarningMessage('🚨 有未提交的文件变更已提交')
       }
     } catch (error) {
