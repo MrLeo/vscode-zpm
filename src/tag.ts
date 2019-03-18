@@ -5,13 +5,13 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 17:53:01
+ * @LastEditTime: 2019-03-18 17:59:54
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
-
-const simpleGit = require('simple-git/promise')
+import * as simpleGit from 'simple-git/promise'
+// const simpleGit = require('simple-git/promise')
 const semver = require('semver')
 const dayjs = require('dayjs')
 
@@ -68,7 +68,7 @@ export class Tag {
   constructor() {
     this._disposable = commands.registerCommand(Commands.tag, async (...args) => {
       console.log('TCL: Tag -> constructor -> args', args)
-      log.appendLine('注册插件')
+      log.appendLine('register command')
       try {
         await this.quickPickPath()
         await this.quickPickEnv()
