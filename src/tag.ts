@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 21:30:32
+ * @LastEditTime: 2019-03-18 21:37:34
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -182,10 +182,14 @@ export class Tag {
           let addTagSingle = async (envName: string) => {
             // 当前环境的最大版本号
             let lastVsersion = '0.0.0'
+            let tagReg = /^(\w+)-v((\d+\.?)+)-(\d{8})$/gi
 
             // 当前环境的版本号列表过滤
             let versions = tags.filter((item: any) => {
-              let replaceTag = item.replace(/^(\w+)-v((\d+\.?)+)-(\d{8})$/gi, (...arg: any) => {
+              if (tagReg.test(item)) {
+                return false
+              }
+              return item.replace(tagReg, (...arg: any) => {
                 let matchStr = arg[0] || ''
                 let tagEnv = arg[1] || ''
 
@@ -208,9 +212,6 @@ export class Tag {
                 lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
                 return matchStr
               })
-              console.log('TCL: Tag -> addTagSingle -> replaceTag', replaceTag)
-              logger(`格式化之后的版本号: ${replaceTag}`)
-              return !!replaceTag
             })
             console.log('TCL: Tag -> addTagSingle -> versions', versions)
             window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`  /  `)}`)
