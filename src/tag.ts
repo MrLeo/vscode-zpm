@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 16:36:27
+ * @LastEditTime: 2019-03-18 16:51:27
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -74,6 +74,7 @@ export class Tag {
 
         console.log('TCL: Tag -> constructor -> path & env', this._path, this._env)
       } catch (err) {
+        console.log('TCL: registerCommand -> error', err)
         window.showErrorMessage(err.message)
       }
     })
@@ -85,16 +86,20 @@ export class Tag {
    * @memberof Tag
    */
   async quickPickPath() {
-    this._folders = getWorkspaceFolders()
+    try {
+      this._folders = getWorkspaceFolders()
 
-    if (this._folders.length > 0) {
-      if (this._folders.length === 1) {
-        this._path = this._folders[0].path
-      } else {
-        let commandFolder = await showQuickPick(this._folders)
-        console.log('TCL: Tag -> quickPickPath -> 选择的目录', commandFolder)
-        this._path = commandFolder.path
+      if (this._folders.length > 0) {
+        if (this._folders.length === 1) {
+          this._path = this._folders[0].path
+        } else {
+          let commandFolder = await showQuickPick(this._folders)
+          console.log('TCL: Tag -> quickPickPath -> 选择的目录', commandFolder)
+          this._path = commandFolder.path
+        }
       }
+    } catch (error) {
+      console.log('TCL: quickPickPath -> error', error)
     }
   }
   // #endregion
@@ -105,9 +110,13 @@ export class Tag {
    * @memberof Tag
    */
   async quickPickEnv() {
-    let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
-    console.log('TCL: Tag -> quickPickEnv -> 选择的环境', commandEnv)
-    this._env = commandEnv.label
+    try {
+      let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
+      console.log('TCL: Tag -> quickPickEnv -> 选择的环境', commandEnv)
+      this._env = commandEnv.label
+    } catch (error) {
+      console.log('TCL: quickPickEnv -> error', error)
+    }
   }
   // #endregion
 
@@ -125,64 +134,74 @@ export class Tag {
         cancellable: true,
       },
       async (progress, token) => {
-        token.onCancellationRequested(() => {
-          window.showInformationMessage(`🏷 取消创建`)
-        })
+        try {
+          token.onCancellationRequested(() => {
+            window.showInformationMessage(`🏷 取消创建`)
+          })
 
-        // const tags = fs.readdirSync('./.git/refs/tags'); // 同步版本的readdir
-        progress.report({ increment: 10, message: '检查是否有未提交的变更' })
-        await this.commitAllFiles()
-        progress.report({ increment: 10, message: '拉取最新的变更' })
-        await this.git.pull({ '--rebase': 'true' })
-        progress.report({ increment: 10, message: '获取所有tag' })
-        const tags = await this.git.tags()
+          // #region 获取tag列表
+          // const tags = fs.readdirSync('./.git/refs/tags'); // 同步版本的readdir
+          progress.report({ increment: 10, message: '检查是否有未提交的变更' })
+          await this.commitAllFiles()
+          progress.report({ increment: 10, message: '拉取最新的变更' })
+          await this.git.pull({ '--rebase': 'true' })
+          progress.report({ increment: 10, message: '获取所有tag' })
+          const tags = await this.git.tags()
+          // #endregion
 
-        let addTagSingle = async (envName: string) => {
-          // 当前环境的最大版本号
-          let lastVsersion = '0.0.0'
-          // 当前环境的版本号列表过滤
-          let versions = tags.all.filter(
-            (item: any) =>
-              !!item.replace(/^(\w+)-v((\d+\.?)+)-(\d{8})$/gi, (...arg: any) => {
-                let matchStr = arg[0] || ''
-                let tagEnv = arg[1] || ''
+          // #region addTagSingle
+          let addTagSingle = async (envName: string) => {
+            // 当前环境的最大版本号
+            let lastVsersion = '0.0.0'
+            // 当前环境的版本号列表过滤
+            let versions = tags.all.filter(
+              (item: any) =>
+                !!item.replace(/^(\w+)-v((\d+\.?)+)-(\d{8})$/gi, (...arg: any) => {
+                  let matchStr = arg[0] || ''
+                  let tagEnv = arg[1] || ''
 
-                progress.report({ message: `格式化版本号: ${matchStr}` })
+                  progress.report({ message: `格式化版本号: ${matchStr}` })
 
-                // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是dev
-                if (envName === 'dev' && /dev.*|qa/.test(tagEnv)) {
-                  envName = tagEnv
-                }
-                if (tagEnv !== envName) {
-                  return ''
-                }
+                  // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是dev
+                  if (envName === 'dev' && /dev.*|qa/.test(tagEnv)) {
+                    envName = tagEnv
+                  }
+                  if (tagEnv !== envName) {
+                    return ''
+                  }
 
-                // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
-                progress.report({ message: `格式化版本号: ${matchStr}` })
-                let tagVersion =
-                  semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1'))) ||
-                  lastVsersion
+                  // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
+                  progress.report({ message: `格式化版本号: ${matchStr}` })
+                  let tagVersion =
+                    semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1'))) ||
+                    lastVsersion
 
-                // 比较版本号，记录最大版本号
-                progress.report({ message: `比较版本号: ${tagVersion} & ${lastVsersion}` })
-                lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
-                return matchStr
-              }),
-          )
-          console.log('TCL: Tag -> addTagSingle -> versions', versions)
-          window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`    /    `)}`)
-          let version = await this.generateNewTag(envName, lastVsersion)
-          progress.report({ message: `生成新版本号: ${JSON.stringify(version)}` })
-          await this.addTag([version])
-        }
-
-        return env === 'all'
-          ? await Promise.all(
-              COMMAND_DEFINITIONS.map(item =>
-                item.versionName ? addTagSingle(item.label) : Promise.resolve(),
-              ),
+                  // 比较版本号，记录最大版本号
+                  progress.report({ message: `比较版本号: ${tagVersion} & ${lastVsersion}` })
+                  lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
+                  return matchStr
+                }),
             )
-          : [await addTagSingle(env)]
+            console.log('TCL: Tag -> addTagSingle -> versions', versions)
+            window.showInformationMessage(
+              `🏷 当前环境的版本号列表:\r\n ${versions.join(`    /    `)}`,
+            )
+            let version = await this.generateNewTag(envName, lastVsersion)
+            progress.report({ message: `生成新版本号: ${JSON.stringify(version)}` })
+            await this.addTag([version])
+          }
+          // #endregion
+
+          return env === 'all'
+            ? await Promise.all(
+                COMMAND_DEFINITIONS.map(item =>
+                  item.versionName ? addTagSingle(item.label) : Promise.resolve(),
+                ),
+              )
+            : [await addTagSingle(env)]
+        } catch (error) {
+          console.log('LOG: addTagByTags -> error', error)
+        }
       },
     )
   }
@@ -194,11 +213,15 @@ export class Tag {
    * @memberof Tag
    */
   async commitAllFiles() {
-    let statusSummary = await this.git.status()
-    if (statusSummary.files.length) {
-      await this.git.add('./*')
-      await this.git.commit('🚀🔖')
-      window.showWarningMessage('🚨 有未提交的文件变更已提交')
+    try {
+      let statusSummary = await this.git.status()
+      if (statusSummary.files.length) {
+        await this.git.add('./*')
+        await this.git.commit('🚀🔖')
+        window.showWarningMessage('🚨 有未提交的文件变更已提交')
+      }
+    } catch (error) {
+      console.log('TCL: commitAllFiles -> error', error)
     }
   }
   // #endregion
@@ -210,13 +233,17 @@ export class Tag {
    * @memberof Tag
    */
   async addTag(versions: Array<Version>) {
-    await this.git.pull({ '--rebase': 'true' })
+    try {
+      await this.git.pull({ '--rebase': 'true' })
 
-    versions.forEach(async (version: Version) => {
-      await this.git.addTag(version.tag)
-      window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
-      await this.git.push()
-    })
+      versions.forEach(async (version: Version) => {
+        await this.git.addTag(version.tag)
+        window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
+        await this.git.push()
+      })
+    } catch (error) {
+      console.log('TCL: addTag -> error', error)
+    }
   }
   // #endregion
 
@@ -229,21 +256,26 @@ export class Tag {
    * @memberof Tag
    */
   generateNewTag(env: string = 'pre', version: string = '0.0.0') {
-    return new Promise(resolve => {
-      // const major = semver.major(version)
-      const minor = semver.minor(version)
-      const patch = semver.patch(version)
-      const date = dayjs().format('YYYYMMDD')
-      const config = { env, version, tag: `${env}-v${version}-${date}` }
-      if (patch >= 99) {
-        config.version = semver.inc(version, 'minor')
-      } else if (minor >= 99) {
-        config.version = semver.inc(version, 'major')
-      } else {
-        config.version = semver.inc(version, 'patch')
+    return new Promise((resolve, reject) => {
+      try {
+        // const major = semver.major(version)
+        const minor = semver.minor(version)
+        const patch = semver.patch(version)
+        const date = dayjs().format('YYYYMMDD')
+        const config = { env, version, tag: `${env}-v${version}-${date}` }
+        if (patch >= 99) {
+          config.version = semver.inc(version, 'minor')
+        } else if (minor >= 99) {
+          config.version = semver.inc(version, 'major')
+        } else {
+          config.version = semver.inc(version, 'patch')
+        }
+        config.tag = `${env}-v${config.version}-${date}`
+        resolve(config)
+      } catch (error) {
+        console.log('TCL: generateNewTag -> error', error)
+        reject(error)
       }
-      config.tag = `${env}-v${config.version}-${date}`
-      resolve(config)
     })
   }
   // #endregion
