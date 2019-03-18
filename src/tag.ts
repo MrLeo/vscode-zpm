@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-16 16:47:50
+ * @LastEditTime: 2019-03-18 16:36:27
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -129,10 +129,12 @@ export class Tag {
           window.showInformationMessage(`🏷 取消创建`)
         })
 
-        progress.report({ increment: 10, message: '获取所有tag' })
         // const tags = fs.readdirSync('./.git/refs/tags'); // 同步版本的readdir
+        progress.report({ increment: 10, message: '检查是否有未提交的变更' })
         await this.commitAllFiles()
+        progress.report({ increment: 10, message: '拉取最新的变更' })
         await this.git.pull({ '--rebase': 'true' })
+        progress.report({ increment: 10, message: '获取所有tag' })
         const tags = await this.git.tags()
 
         let addTagSingle = async (envName: string) => {
