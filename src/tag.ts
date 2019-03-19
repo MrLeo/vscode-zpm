@@ -5,13 +5,15 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-18 21:44:41
+ * @LastEditTime: 2019-03-19 11:08:03
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
 // import * as child_process from 'child_process'
 import * as fs from 'fs'
+// import * as shell from 'shelljs'
+// import * as execa from 'execa'
 import * as simpleGit from 'simple-git/promise'
 import * as semver from 'semver'
 import * as dayjs from 'dayjs'
@@ -66,6 +68,7 @@ export class Tag {
     return this._git
   }
 
+  // #region 构造函数
   constructor() {
     this._disposable = commands.registerCommand(Commands.tag, async (...args) => {
       console.log('TCL: Tag -> constructor -> args', args)
@@ -87,6 +90,7 @@ export class Tag {
       }
     })
   }
+  // #endregion
 
   // #region 选择目录
   /**
@@ -172,8 +176,7 @@ export class Tag {
           log.appendLine(JSON.stringify(pull))
 
           logger('开始获取所有tag')
-          const tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || []
-          // const tags = (await this.git.tags()).all
+          const tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
           logger(`> git tags`)
           logger(JSON.stringify(tags))
           // #endregion
