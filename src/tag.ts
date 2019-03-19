@@ -5,14 +5,13 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-19 11:12:13
+ * @LastEditTime: 2019-03-19 11:20:15
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
 // import * as child_process from 'child_process'
 import * as fs from 'fs'
-// import * as shell from 'shelljs'
 import * as simpleGit from 'simple-git/promise'
 import * as semver from 'semver'
 import * as dayjs from 'dayjs'
