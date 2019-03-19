@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-19 11:11:36
+ * @LastEditTime: 2019-03-19 11:12:13
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -256,7 +256,7 @@ export class Tag {
         log.appendLine('> git add')
         log.appendLine(JSON.stringify(add))
 
-        let commit = await this.git.commit('🚀🔖')
+        let commit = await this.git.commit('🚀  🔖')
         log.appendLine('> git commit')
         log.appendLine(JSON.stringify(commit))
 
