@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-19 14:18:52
+ * @LastEditTime: 2019-03-19 14:21:13
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -178,8 +178,8 @@ export class Tag {
         try {
           token.onCancellationRequested(() => window.showInformationMessage(`🏷 取消创建`))
 
-          await this.git('listRemote')
-          await this.git('log')
+          // await this.git('listRemote')
+          // await this.git('log')
 
           // #region 获取tag列表
           logger('开始检查是否有未提交的变更')
