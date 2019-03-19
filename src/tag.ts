@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-19 13:14:46
+ * @LastEditTime: 2019-03-19 13:46:34
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -13,7 +13,7 @@ import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } 
 
 const fs = require('fs')
 const execa = require('execa')
-const simplegit = require('simple-git/promise')
+const simplegit = require('simple-git')
 const semver = require('semver')
 const dayjs = require('dayjs')
 
@@ -60,12 +60,29 @@ export class Tag {
   private _folders: QuickPickItem[] = []
   private _git?: any
 
-  get git(): any {
+  get simplegit(): any {
     if (!this._git) {
       this._git = simplegit(this._path || process.cwd())
     }
     return this._git
   }
+
+  // #region simple git
+  git(command: string, ...config: any) {
+    return new Promise((resolve, reject) => {
+      this.simplegit[command](...config, function(
+        error: any,
+        result: {} | PromiseLike<{}> | undefined,
+      ) {
+        console.log(`git ${command} ${JSON.stringify(config)}-> error`, error)
+        console.log(`git ${command} ${JSON.stringify(config)}-> result`, result)
+        log.appendLine(`> git ${command}`)
+        log.appendLine(JSON.stringify(result || error || '{}'))
+        return error ? reject(error) : resolve(result)
+      })
+    })
+  }
+  // #endregion
 
   // #region 构造函数
   constructor() {
@@ -107,7 +124,9 @@ export class Tag {
           let commandFolder = await showQuickPick(this._folders)
           console.log('TCL: Tag -> quickPickPath -> 选择的目录', commandFolder)
           log.appendLine(`选择的目录: ${JSON.stringify(commandFolder)}`)
-          this._path = commandFolder.path
+          if (commandFolder) {
+            this._path = commandFolder.path
+          }
         }
       }
     } catch (error) {
@@ -127,7 +146,9 @@ export class Tag {
       let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
       console.log('TCL: Tag -> quickPickEnv -> 选择的环境', commandEnv)
       log.appendLine(`选择的环境: ${JSON.stringify(commandEnv)}`)
-      this._env = commandEnv.label
+      if (commandEnv) {
+        this._env = commandEnv.label
+      }
     } catch (error) {
       console.log('TCL: quickPickEnv -> error', error)
       log.appendLine(`error: ${error.message}`)
@@ -157,22 +178,15 @@ export class Tag {
         try {
           token.onCancellationRequested(() => window.showInformationMessage(`🏷 取消创建`))
 
-          let remotes = await this.git.listRemote()
-          log.appendLine('> git remote')
-          log.appendLine(JSON.stringify(remotes))
-
-          let logs = await this.git.log()
-          log.appendLine('> git log')
-          log.appendLine(JSON.stringify(logs))
+          await this.git('listRemote')
+          await this.git('log')
 
           // #region 获取tag列表
           logger('开始检查是否有未提交的变更')
           await this.commitAllFiles()
 
           logger('开始拉取最新的变更')
-          let pull = await this.git.pull({ '--rebase': 'true' })
-          log.appendLine('> git pull --rebase')
-          log.appendLine(JSON.stringify(pull))
+          await this.git('pull', { '--rebase': 'true' })
 
           logger('开始获取所有tag')
           const tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
@@ -247,19 +261,11 @@ export class Tag {
    */
   async commitAllFiles() {
     try {
-      let statusSummary = await this.git.status()
+      let statusSummary: any = await this.git('status')
       console.log('TCL: commitAllFiles -> statusSummary', statusSummary)
-      log.appendLine(`> git status`)
-      log.appendLine(JSON.stringify(statusSummary))
       if (statusSummary.files.length) {
-        let add = await this.git.add('./*')
-        log.appendLine('> git add')
-        log.appendLine(JSON.stringify(add))
-
-        let commit = await this.git.commit('🚀  🔖')
-        log.appendLine('> git commit')
-        log.appendLine(JSON.stringify(commit))
-
+        await this.git('add', './*')
+        await this.git('commit', '🚀  🔖')
         window.showWarningMessage('🚨 有未提交的文件变更已提交')
       }
     } catch (error) {
@@ -277,20 +283,12 @@ export class Tag {
    */
   async addTag(versions: Array<Version>) {
     try {
-      await this.git.pull({ '--rebase': 'true' })
+      await this.git('pull', { '--rebase': 'true' })
 
       versions.forEach(async (version: Version) => {
-        let tag = await this.git.addTag(version.tag)
-        console.log('TCL: Tag -> addTag -> tag', tag)
+        await this.git('addTag', version.tag)
         window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
-        log.appendLine('> git tag')
-        log.appendLine(tag)
-
-        // await this.git.push()
-        let push = await execa('git', ['push'])
-        console.log('TCL: Tag -> addTag -> push', push)
-        log.appendLine('> git push')
-        log.appendLine(push.stdout)
+        await this.git('push')
       })
     } catch (error) {
       console.log('TCL: addTag -> error', error)
