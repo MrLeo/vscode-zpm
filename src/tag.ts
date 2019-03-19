@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-19 13:46:34
+ * @LastEditTime: 2019-03-19 14:18:52
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -264,9 +264,11 @@ export class Tag {
       let statusSummary: any = await this.git('status')
       console.log('TCL: commitAllFiles -> statusSummary', statusSummary)
       if (statusSummary.files.length) {
+        window.showWarningMessage('🚨 有未提交的文件变更已提交')
         await this.git('add', './*')
         await this.git('commit', '🚀  🔖')
-        window.showWarningMessage('🚨 有未提交的文件变更已提交')
+        let branchSummary: any = await this.git('branch')
+        await this.git('push', 'origin', branchSummary.current)
       }
     } catch (error) {
       console.log('TCL: commitAllFiles -> error', error)
@@ -288,7 +290,7 @@ export class Tag {
       versions.forEach(async (version: Version) => {
         await this.git('addTag', version.tag)
         window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
-        await this.git('push')
+        await this.git('pushTags', 'origin')
       })
     } catch (error) {
       console.log('TCL: addTag -> error', error)
