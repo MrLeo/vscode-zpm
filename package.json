@@ -61,11 +61,9 @@
     "webpack-cli": "^3.3.0"
   },
   "dependencies": {
-    "@types/shelljs": "^0.8.3",
     "dayjs": "^1.8.10",
     "execa": "^1.0.0",
     "semver": "^5.6.0",
-    "shelljs": "^0.8.3",
     "simple-git": "^1.107.0"
   }
 }
