@@ -5,16 +5,17 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-19 13:02:13
+ * @LastEditTime: 2019-03-19 13:14:46
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
-import * as fs from 'fs'
-import * as execa from 'execa'
-import * as simplegit from 'simple-git/promise'
-import * as semver from 'semver'
-import * as dayjs from 'dayjs'
+
+const fs = require('fs')
+const execa = require('execa')
+const simplegit = require('simple-git/promise')
+const semver = require('semver')
+const dayjs = require('dayjs')
 
 const log = window.createOutputChannel('zpm/log')
 log.show()
@@ -279,10 +280,17 @@ export class Tag {
       await this.git.pull({ '--rebase': 'true' })
 
       versions.forEach(async (version: Version) => {
-        await this.git.addTag(version.tag)
+        let tag = await this.git.addTag(version.tag)
+        console.log('TCL: Tag -> addTag -> tag', tag)
         window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
+        log.appendLine('> git tag')
+        log.appendLine(tag)
+
         // await this.git.push()
-        execa('git', ['push'])
+        let push = await execa('git', ['push'])
+        console.log('TCL: Tag -> addTag -> push', push)
+        log.appendLine('> git push')
+        log.appendLine(push.stdout)
       })
     } catch (error) {
       console.log('TCL: addTag -> error', error)
