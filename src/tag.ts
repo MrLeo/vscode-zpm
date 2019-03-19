@@ -5,12 +5,13 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-19 11:26:37
+ * @LastEditTime: 2019-03-19 13:02:13
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
 import * as fs from 'fs'
+import * as execa from 'execa'
 import * as simplegit from 'simple-git/promise'
 import * as semver from 'semver'
 import * as dayjs from 'dayjs'
@@ -280,7 +281,8 @@ export class Tag {
       versions.forEach(async (version: Version) => {
         await this.git.addTag(version.tag)
         window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
-        await this.git.push()
+        // await this.git.push()
+        execa('git', ['push'])
       })
     } catch (error) {
       console.log('TCL: addTag -> error', error)
