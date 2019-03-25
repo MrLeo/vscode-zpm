@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description:
  * @Date: 2019-03-25 09:27:06
- * @LastEditTime: 2019-03-25 17:37:44
+ * @LastEditTime: 2019-03-25 17:42:43
  */
 
 import { window, OutputChannel } from 'vscode'
@@ -36,7 +36,7 @@ export class LoggerBase {
     }
 
     if (Object.prototype.toString.call(arg) === '[object Object]') {
-      Object.entries(arg).forEach((key, value) => {
+      Object.entries(arg).forEach(([key, value]) => {
         this.log.appendLine(
           `${_prefix}${key} -> ${isString(value) ? value : JSON.stringify(value)}`,
         )
