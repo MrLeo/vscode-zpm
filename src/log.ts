@@ -5,11 +5,11 @@
  * @version: 0.0.0
  * @Description:
  * @Date: 2019-03-25 09:27:06
- * @LastEditTime: 2019-03-25 17:42:43
+ * @LastEditTime: 2019-03-25 18:00:09
  */
 
 import { window, OutputChannel } from 'vscode'
-export const isString = (obj: any) => Object.prototype.toString.call(obj) === '[object String]'
+export const isString = (obj: any) => typeof obj === 'string'
 
 export class LoggerBase {
   private log: OutputChannel
