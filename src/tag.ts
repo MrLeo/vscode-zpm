@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-25 16:50:26
+ * @LastEditTime: 2019-03-25 17:46:38
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -95,9 +95,7 @@ export class Tag {
         error: any,
         result: {} | PromiseLike<{}> | undefined,
       ) {
-        console.log(`git ${command} ${JSON.stringify(config)}-> error`, error)
-        console.log(`git ${command} ${JSON.stringify(config)}-> result`, result)
-        log.info(`> git ${command}`)
+        log.info(`> git ${command} ${JSON.stringify(config)}`)
         log.info(result || error)
         return error ? reject(error) : resolve(result)
       })
