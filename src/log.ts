@@ -5,11 +5,11 @@
  * @version: 0.0.0
  * @Description:
  * @Date: 2019-03-25 09:27:06
- * @LastEditTime: 2019-03-25 17:31:54
+ * @LastEditTime: 2019-03-25 17:37:44
  */
 
 import { window, OutputChannel } from 'vscode'
-export const isObject = (obj: any) => Object.prototype.toString.call(obj) === '[object Object]'
+export const isString = (obj: any) => Object.prototype.toString.call(obj) === '[object String]'
 
 export class LoggerBase {
   private log: OutputChannel
@@ -38,15 +38,15 @@ export class LoggerBase {
     if (Object.prototype.toString.call(arg) === '[object Object]') {
       Object.entries(arg).forEach((key, value) => {
         this.log.appendLine(
-          `${_prefix}${key} -> ${isObject(value) ? JSON.stringify(value) : value}`,
+          `${_prefix}${key} -> ${isString(value) ? value : JSON.stringify(value)}`,
         )
       })
     } else if (Object.prototype.toString.call(arg) === '[object Array]') {
       arg.forEach((item: any) => {
-        this.log.appendLine(`${_prefix}${isObject(item) ? JSON.stringify(item) : item}`)
+        this.log.appendLine(`${_prefix}${isString(item) ? item : JSON.stringify(item)}`)
       })
     } else {
-      this.log.appendLine(`${_prefix}${isObject(arg) ? JSON.stringify(arg) : arg}`)
+      this.log.appendLine(`${_prefix}${isString(arg) ? arg : JSON.stringify(arg)}`)
     }
   }
 }
