@@ -5,20 +5,20 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-19 14:21:13
+ * @LastEditTime: 2019-03-25 11:13:40
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
 import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
 
-const fs = require('fs')
-const execa = require('execa')
+import * as fs from 'fs'
+import * as semver from 'semver'
+import * as dayjs from 'dayjs'
+// import * as simplegit from 'simple-git'
+import Logger from './log'
 const simplegit = require('simple-git')
-const semver = require('semver')
-const dayjs = require('dayjs')
 
-const log = window.createOutputChannel('zpm/log')
-log.show()
+const log = new Logger()
 
 // #region 接口声明
 export interface Version {
@@ -52,43 +52,25 @@ export const COMMAND_DEFINITIONS: QuickPickItem[] = [
 ]
 // #endregion
 
+// const execa = require('execa')
+// const git = async (cmd, opts) => {
+//   const cmdList = Array.isArray(cmd) ? cmd : cmd.split(' ')
+//   const { stdout } = await execa('git', cmdList, opts)
+//   return stdout
+// }
+
 @command()
 export class Tag {
   private _disposable: Disposable
   private _env?: string
   private _path?: string
   private _folders: QuickPickItem[] = []
-  private _git?: any
-
-  get simplegit(): any {
-    if (!this._git) {
-      this._git = simplegit(this._path || process.cwd())
-    }
-    return this._git
-  }
-
-  // #region simple git
-  git(command: string, ...config: any) {
-    return new Promise((resolve, reject) => {
-      this.simplegit[command](...config, function(
-        error: any,
-        result: {} | PromiseLike<{}> | undefined,
-      ) {
-        console.log(`git ${command} ${JSON.stringify(config)}-> error`, error)
-        console.log(`git ${command} ${JSON.stringify(config)}-> result`, result)
-        log.appendLine(`> git ${command}`)
-        log.appendLine(JSON.stringify(result || error || '{}'))
-        return error ? reject(error) : resolve(result)
-      })
-    })
-  }
-  // #endregion
 
   // #region 构造函数
   constructor() {
     this._disposable = commands.registerCommand(Commands.tag, async (...args) => {
       console.log('TCL: Tag -> constructor -> args', args)
-      log.appendLine('register command')
+      log.info('register command')
       try {
         await this.quickPickPath()
         await this.quickPickEnv()
@@ -97,13 +79,30 @@ export class Tag {
         this._env && (await this.addTagByTags(this._env))
 
         console.log('TCL: Tag -> constructor -> path & env', this._path, this._env)
-        log.appendLine(`env: ${this._env}`)
-        log.appendLine(`path: ${this._path}`)
+        log.info(`env: ${this._env}`)
+        log.info(`path: ${this._path}`)
       } catch (err) {
         console.log('TCL: registerCommand -> error', err)
-        log.appendLine(`error: ${err.message}`)
-        window.showErrorMessage(err.message)
+        log.error(err.message || err)
+        window.showErrorMessage(err.message || err)
       }
+    })
+  }
+  // #endregion
+
+  // #region simple git
+  git(command: string, ...config: any) {
+    return new Promise((resolve, reject) => {
+      simplegit(this._path || process.cwd())[command](...config, function(
+        error: any,
+        result: {} | PromiseLike<{}> | undefined,
+      ) {
+        console.log(`git ${command} ${JSON.stringify(config)}-> error`, error)
+        console.log(`git ${command} ${JSON.stringify(config)}-> result`, result)
+        log.info(`> git ${command}`)
+        log.info(JSON.stringify(result || error || '{}'))
+        return error ? reject(error) : resolve(result)
+      })
     })
   }
   // #endregion
@@ -123,7 +122,7 @@ export class Tag {
         } else {
           let commandFolder = await showQuickPick(this._folders)
           console.log('TCL: Tag -> quickPickPath -> 选择的目录', commandFolder)
-          log.appendLine(`选择的目录: ${JSON.stringify(commandFolder)}`)
+          log.info(`选择的目录: ${JSON.stringify(commandFolder)}`)
           if (commandFolder) {
             this._path = commandFolder.path
           }
@@ -131,7 +130,7 @@ export class Tag {
       }
     } catch (error) {
       console.log('TCL: quickPickPath -> error', error)
-      log.appendLine(`error: ${error.message}`)
+      log.error(error.message || error)
     }
   }
   // #endregion
@@ -145,13 +144,13 @@ export class Tag {
     try {
       let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
       console.log('TCL: Tag -> quickPickEnv -> 选择的环境', commandEnv)
-      log.appendLine(`选择的环境: ${JSON.stringify(commandEnv)}`)
+      log.info(`选择的环境: ${JSON.stringify(commandEnv)}`)
       if (commandEnv) {
         this._env = commandEnv.label
       }
     } catch (error) {
       console.log('TCL: quickPickEnv -> error', error)
-      log.appendLine(`error: ${error.message}`)
+      log.error(error.message || error)
     }
   }
   // #endregion
@@ -170,9 +169,9 @@ export class Tag {
         cancellable: true,
       },
       async (progress, token) => {
-        const logger = (text: string) => {
+        const logger = async (text: string) => {
           progress.report({ message: text })
-          log.appendLine(text)
+          log.info(text)
         }
 
         try {
@@ -247,7 +246,7 @@ export class Tag {
             : [await addTagSingle(env)]
         } catch (error) {
           console.log('LOG: addTagByTags -> error', error)
-          logger(`error: ${error.message}`)
+          log.error(error.message || error)
         }
       },
     )
@@ -272,7 +271,7 @@ export class Tag {
       }
     } catch (error) {
       console.log('TCL: commitAllFiles -> error', error)
-      log.appendLine(`error: ${error.message}`)
+      log.error(error.message || error)
     }
   }
   // #endregion
@@ -294,7 +293,7 @@ export class Tag {
       })
     } catch (error) {
       console.log('TCL: addTag -> error', error)
-      log.appendLine(`error: ${error.message}`)
+      log.error(error.message || error)
     }
   }
   // #endregion
@@ -326,7 +325,7 @@ export class Tag {
         resolve(config)
       } catch (error) {
         console.log('TCL: generateNewTag -> error', error)
-        log.appendLine(`error: ${error.message}`)
+        log.error(error.message || error)
         reject(error)
       }
     })
