@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description:
  * @Date: 2019-03-25 09:27:06
- * @LastEditTime: 2019-03-25 15:58:24
+ * @LastEditTime: 2019-03-25 16:51:43
  */
 
 import { window, OutputChannel } from 'vscode'
@@ -82,6 +82,7 @@ export default class Logger extends LoggerBase {
    * @memberof Logger
    */
   info(message: any): void {
+    console.log('TCL: Logger -> message', message)
     this.messageTypeHandler(` -> ${message}`)
   }
 
@@ -93,6 +94,7 @@ export default class Logger extends LoggerBase {
    * @memberof Logger
    */
   error(message: any): void {
+    console.log('TCL: Logger -> message', message)
     this.messageTypeHandler(`error -> ${message}`)
   }
 }

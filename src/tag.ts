@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-25 16:46:50
+ * @LastEditTime: 2019-03-25 16:50:26
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -70,7 +70,6 @@ export class Tag {
   // #region 构造函数
   constructor() {
     this._disposable = commands.registerCommand(Commands.tag, async (...args) => {
-      console.log('TCL: Tag -> constructor -> args', args)
       log.info('register command')
       try {
         await this.quickPickPath()
@@ -79,11 +78,9 @@ export class Tag {
         // tslint:disable-next-line: no-unused-expression
         this._env && (await this.addTagByTags(this._env))
 
-        console.log('TCL: Tag -> constructor -> path & env', this._path, this._env)
         log.info(`env: ${this._env}`)
         log.info(`path: ${this._path}`)
       } catch (err) {
-        console.log('TCL: registerCommand -> error', err)
         log.error(err.message || err)
         window.showErrorMessage(err.message || err)
       }
@@ -122,7 +119,6 @@ export class Tag {
           this._path = this._folders[0].path
         } else {
           let commandFolder = await showQuickPick(this._folders)
-          console.log('TCL: Tag -> quickPickPath -> 选择的目录', commandFolder)
           log.info(`选择的目录: ${JSON.stringify(commandFolder)}`)
           if (commandFolder) {
             this._path = commandFolder.path
@@ -130,7 +126,6 @@ export class Tag {
         }
       }
     } catch (error) {
-      console.log('TCL: quickPickPath -> error', error)
       log.error(error.message || error)
     }
   }
@@ -144,13 +139,11 @@ export class Tag {
   async quickPickEnv() {
     try {
       let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
-      console.log('TCL: Tag -> quickPickEnv -> 选择的环境', commandEnv)
       log.info(`选择的环境: ${JSON.stringify(commandEnv)}`)
       if (commandEnv) {
         this._env = commandEnv.label
       }
     } catch (error) {
-      console.log('TCL: quickPickEnv -> error', error)
       log.error(error.message || error)
     }
   }
@@ -228,7 +221,6 @@ export class Tag {
                   })
                 : false
             })
-            console.log('TCL: Tag -> addTagSingle -> versions', versions)
             window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`  /  `)}`)
 
             let version = await this.generateNewTag(envName, lastVsersion)
@@ -246,7 +238,6 @@ export class Tag {
               )
             : [await addTagSingle(env)]
         } catch (error) {
-          console.log('LOG: addTagByTags -> error', error)
           log.error(error.message || error)
         }
       },
@@ -262,7 +253,6 @@ export class Tag {
   async commitAllFiles() {
     try {
       let statusSummary: any = await this.git('status')
-      console.log('TCL: commitAllFiles -> statusSummary', statusSummary)
       if (statusSummary.files.length) {
         window.showWarningMessage('🚨 有未提交的文件变更已提交')
         await this.git('add', './*')
@@ -271,7 +261,6 @@ export class Tag {
         await this.git('push', 'origin', branchSummary.current)
       }
     } catch (error) {
-      console.log('TCL: commitAllFiles -> error', error)
       log.error(error.message || error)
     }
   }
@@ -293,7 +282,6 @@ export class Tag {
         await this.git('pushTags', 'origin')
       })
     } catch (error) {
-      console.log('TCL: addTag -> error', error)
       log.error(error.message || error)
     }
   }
@@ -325,7 +313,6 @@ export class Tag {
         config.tag = `${env}-v${config.version}-${date}`
         resolve(config)
       } catch (error) {
-        console.log('TCL: generateNewTag -> error', error)
         log.error(error.message || error)
         reject(error)
       }
