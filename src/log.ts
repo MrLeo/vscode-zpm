@@ -5,10 +5,11 @@
  * @version: 0.0.0
  * @Description:
  * @Date: 2019-03-25 09:27:06
- * @LastEditTime: 2019-03-25 16:51:43
+ * @LastEditTime: 2019-03-25 17:31:54
  */
 
 import { window, OutputChannel } from 'vscode'
+export const isObject = (obj: any) => Object.prototype.toString.call(obj) === '[object Object]'
 
 export class LoggerBase {
   private log: OutputChannel
@@ -26,16 +27,27 @@ export class LoggerBase {
 
   /**
    * @param {*} message
-   * @memberof LoggerBase
+   * @memberof Logger
    */
-  appendLine(message: any) {
-    if (
-      Object.prototype.toString.call(message) === '[object Object]' ||
-      Object.prototype.toString.call(message) === '[object Array]'
-    ) {
-      message = JSON.stringify(message)
+  appendLine(arg: any, prefix?: string) {
+    let _prefix = this.prefix
+    if (prefix) {
+      _prefix = `${_prefix}-${prefix} -> `
     }
-    this.log.appendLine(`${this.prefix}${message}`)
+
+    if (Object.prototype.toString.call(arg) === '[object Object]') {
+      Object.entries(arg).forEach((key, value) => {
+        this.log.appendLine(
+          `${_prefix}${key} -> ${isObject(value) ? JSON.stringify(value) : value}`,
+        )
+      })
+    } else if (Object.prototype.toString.call(arg) === '[object Array]') {
+      arg.forEach((item: any) => {
+        this.log.appendLine(`${_prefix}${isObject(item) ? JSON.stringify(item) : item}`)
+      })
+    } else {
+      this.log.appendLine(`${_prefix}${isObject(arg) ? JSON.stringify(arg) : arg}`)
+    }
   }
 }
 
@@ -48,32 +60,6 @@ export default class Logger extends LoggerBase {
     super()
   }
 
-  /**
-   * @private
-   * @param {*} message
-   * @memberof Logger
-   */
-  private messageTypeHandler(message: any) {
-    const typesMap = new Map()
-    typesMap.set('[object Object]', () => {
-      for (let item of message) {
-        this.appendLine(`${item} -> ${message[item]}`)
-      }
-    })
-    typesMap.set('[object Array]', () => {
-      message.forEach((item: any) => {
-        this.appendLine(item)
-      })
-    })
-
-    let handler = typesMap.get(Object.prototype.toString.call(message))
-    if (handler) {
-      handler()
-    } else {
-      this.appendLine(message)
-    }
-  }
-
   info(message: String): void
   info(message: Array<any>): void
   info(message: Object): void
@@ -83,7 +69,7 @@ export default class Logger extends LoggerBase {
    */
   info(message: any): void {
     console.log('TCL: Logger -> message', message)
-    this.messageTypeHandler(` -> ${message}`)
+    this.appendLine(message)
   }
 
   error(message: String): void
@@ -95,6 +81,6 @@ export default class Logger extends LoggerBase {
    */
   error(message: any): void {
     console.log('TCL: Logger -> message', message)
-    this.messageTypeHandler(`error -> ${message}`)
+    this.appendLine(message, 'error')
   }
 }
