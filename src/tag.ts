@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-25 11:13:40
+ * @LastEditTime: 2019-03-25 16:03:35
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -14,10 +14,11 @@ import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } 
 import * as fs from 'fs'
 import * as semver from 'semver'
 import * as dayjs from 'dayjs'
-// import * as simplegit from 'simple-git'
 import Logger from './log'
+
 const simplegit = require('simple-git')
 
+// const _Logger: typeof Logger = require('./log') // 懒加载Logger模块
 const log = new Logger()
 
 // #region 接口声明

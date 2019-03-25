@@ -5,13 +5,13 @@
  * @version: 0.0.0
  * @Description:
  * @Date: 2019-03-25 09:27:06
- * @LastEditTime: 2019-03-25 10:17:08
+ * @LastEditTime: 2019-03-25 15:58:24
  */
 
-import { window } from 'vscode'
+import { window, OutputChannel } from 'vscode'
 
 export class LoggerBase {
-  private log: import('vscode').OutputChannel
+  private log: OutputChannel
   private prefix: string
 
   /**
