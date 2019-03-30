@@ -130,8 +130,8 @@
 - define bem
 
   ```css
-  // #region ${1:block}
   /* @define ${1:block};weak */
+  // #region ${1:block}
   .${1:block} {
     $2
   }
