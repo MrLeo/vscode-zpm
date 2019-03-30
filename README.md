@@ -130,10 +130,12 @@
 - define bem
 
   ```css
+  // #region ${1:block}
   /* @define ${1:block};weak */
   .${1:block} {
     $2
   }
+  // #endregion
   ```
 
 - stylelint

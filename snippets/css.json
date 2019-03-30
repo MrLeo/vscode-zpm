@@ -21,7 +21,14 @@
   },
   "stylelint 定义BEM": {
     "prefix": "bem",
-    "body": ["/* @define ${1:block};weak */", ".${1:block} {", "  $2", "}"],
+    "body": [
+      "// #region ${1:block}",
+      "/* @define ${1:block};weak */",
+      ".${1:block} {",
+      "  $2",
+      "}",
+      "// #endregion"
+    ],
     "description": "stylelint 定义BEM"
   }
 }
