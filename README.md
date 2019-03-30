@@ -127,12 +127,14 @@
 
 ## css
 
-```css
-/* @define ${1:block};weak */
-.${1:block} {
-  $2
-}
-```
+- define bem
+
+  ```css
+  /* @define ${1:block};weak */
+  .${1:block} {
+    $2
+  }
+  ```
 
 - stylelint
 
