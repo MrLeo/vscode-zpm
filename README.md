@@ -124,3 +124,30 @@
   console.log(`[${2:LOG}]$3 -> $4`,$5)$6
   console.groupEnd()
   ```
+
+## css
+
+```css
+/* @define ${1:block};weak */
+.${1:block} {
+  $2
+}
+```
+
+- stylelint
+
+  ```javascript
+  /* stylelint-disable */
+  ```
+
+  ```javascript
+  /* stylelint-enable */
+  ```
+
+  ```javascript
+  // stylelint-disable-line
+  ```
+
+  ```javascript
+  // stylelint-disable-next-line
+  ```
