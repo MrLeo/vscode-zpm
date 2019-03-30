@@ -1,0 +1,27 @@
+{
+  "stylelint-disable": {
+    "prefix": "stylelint",
+    "body": ["/* stylelint-disable */"],
+    "description": "禁用stylelint"
+  },
+  "stylelint-enable": {
+    "prefix": "stylelint",
+    "body": ["/* stylelint-enable */"],
+    "description": "启用stylelint"
+  },
+  "stylelint-disable-line": {
+    "prefix": "stylelint",
+    "body": [" // stylelint-disable-line"],
+    "description": "stylelint忽略当前行"
+  },
+  "stylelint-disable-next-line": {
+    "prefix": "stylelint",
+    "body": [" // stylelint-disable-next-line"],
+    "description": "stylelint忽略下一行"
+  },
+  "stylelint 定义BEM": {
+    "prefix": "bem",
+    "body": ["/* @define ${1:block};weak */", ".${1:block} {", "  $2", "}"],
+    "description": "stylelint 定义BEM"
+  }
+}

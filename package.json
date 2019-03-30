@@ -37,6 +37,10 @@
       {
         "language": "javascript",
         "path": "./snippets/javascript.json"
+      },
+      {
+        "language": "css",
+        "path": "./snippets/css.json"
       }
     ]
   },
