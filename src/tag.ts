@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-03-25 17:46:38
+ * @LastEditTime: 2019-04-03 15:37:56
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -91,10 +91,7 @@ export class Tag {
   // #region simple git
   git(command: string, ...config: any) {
     return new Promise((resolve, reject) => {
-      simplegit(this._path || process.cwd())[command](...config, function(
-        error: any,
-        result: {} | PromiseLike<{}> | undefined,
-      ) {
+      simplegit(this._path || process.cwd())[command](...config, function(error: any, result: any) {
         log.info(`> git ${command} ${JSON.stringify(config)}`)
         log.info(result || error)
         return error ? reject(error) : resolve(result)
@@ -180,7 +177,12 @@ export class Tag {
           await this.git('pull', { '--rebase': 'true' })
 
           logger('开始获取所有tag')
-          const tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
+          interface Tags {
+            latest?: string
+            all?: string[]
+          }
+          // const tags: Tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
+          const tags: Tags = await this.git('tags')
           logger(`> git tags`)
           logger(JSON.stringify(tags))
           // #endregion
@@ -192,33 +194,38 @@ export class Tag {
             let tagReg = /^(\w+)-v((\d+\.?)+)-(\d{8})$/gi
 
             // 当前环境的版本号列表过滤
-            let versions = tags.filter((item: any) => {
-              return tagReg.test(item)
-                ? item.replace(tagReg, (...arg: any) => {
-                    let matchStr = arg[0] || ''
-                    let tagEnv = arg[1] || ''
+            let versions = tags.all
+              ? tags.all.filter((item: any) => {
+                  return tagReg.test(item)
+                    ? item.replace(tagReg, (...arg: any) => {
+                        let matchStr = arg[0] || ''
+                        let tagEnv = arg[1] || ''
 
-                    // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是dev
-                    if (envName === 'dev' && /dev.*|qa/.test(tagEnv)) {
-                      envName = tagEnv
-                    }
-                    if (tagEnv !== envName) {
-                      return ''
-                    }
+                        // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是dev
+                        if (envName === 'dev' && /dev.*|qa/.test(tagEnv)) {
+                          envName = tagEnv
+                        }
+                        if (tagEnv !== envName) {
+                          return ''
+                        }
 
-                    // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
-                    logger(`格式化版本号: ${matchStr}`)
-                    let tagVersion =
-                      semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1')) || '') ||
-                      lastVsersion
+                        // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
+                        logger(`格式化版本号: ${matchStr}`)
+                        let tagVersion =
+                          semver.valid(
+                            semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1')) || '',
+                          ) || lastVsersion
 
-                    // 比较版本号，记录最大版本号
-                    logger(`比较版本号: ${tagVersion} & ${lastVsersion}`)
-                    lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
-                    return matchStr
-                  })
-                : false
-            })
+                        // 比较版本号，记录最大版本号
+                        logger(`比较版本号: ${tagVersion} & ${lastVsersion}`)
+                        lastVsersion = semver.gt(tagVersion, lastVsersion)
+                          ? tagVersion
+                          : lastVsersion
+                        return matchStr
+                      })
+                    : false
+                })
+              : []
             window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`  /  `)}`)
 
             let version = await this.generateNewTag(envName, lastVsersion)
