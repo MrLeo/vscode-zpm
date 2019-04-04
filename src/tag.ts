@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-04-03 15:37:56
+ * @LastEditTime: 2019-04-04 11:36:48
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -42,9 +42,9 @@ export const COMMAND_DEFINITIONS: QuickPickItem[] = [
     versionName: 'version_pre',
   },
   {
-    label: 'dev',
+    label: 'qa',
     description: 'QA测试环境',
-    versionName: 'version_dev',
+    versionName: 'version_qa',
   },
   {
     label: 'all',
@@ -147,7 +147,7 @@ export class Tag {
   // #region 根据Tag列表添加Tag
   /**
    * 根据Tag列表添加Tag
-   * @param {string} env master|pre|dev|all
+   * @param {string} env master|pre|qa|all
    * @memberof Tag
    */
   async addTagByTags(env: string) {
@@ -201,8 +201,8 @@ export class Tag {
                         let matchStr = arg[0] || ''
                         let tagEnv = arg[1] || ''
 
-                        // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是dev
-                        if (envName === 'dev' && /dev.*|qa/.test(tagEnv)) {
+                        // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是qa
+                        if (envName === 'qa' && /dev.*|qa/.test(tagEnv)) {
                           envName = tagEnv
                         }
                         if (tagEnv !== envName) {
