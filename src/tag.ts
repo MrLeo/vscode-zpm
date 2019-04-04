@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-04-04 12:19:39
+ * @LastEditTime: 2019-04-04 13:43:55
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -66,34 +66,52 @@ export class Tag {
   private _env?: string
   private _path?: string
   private _folders: QuickPickItem[] = []
+  private _logger: any
 
   // #region 构造函数
   constructor() {
     this._disposable = commands.registerCommand(Commands.tag, async (...args) => {
-      log.info('register command')
-      try {
-        await this.quickPickPath()
-        await this.quickPickEnv()
+      window.withProgress(
+        {
+          location: ProgressLocation.Notification,
+          title: '创建Tag',
+          cancellable: true,
+        },
+        async (progress, token) => {
+          token.onCancellationRequested(() => window.showInformationMessage(`🏷 取消创建`))
 
-        // tslint:disable-next-line: no-unused-expression
-        this._env && (await this.addTagByTags(this._env))
+          this._logger = async (text: string) => {
+            progress.report({ message: text })
+            log.info(text)
+          }
 
-        log.info(`env: ${this._env}`)
-        log.info(`path: ${this._path}`)
-      } catch (err) {
-        log.error(err.message || err)
-        window.showErrorMessage(err.message || err)
-      }
+          this._logger('register command')
+          try {
+            await this.quickPickPath()
+            await this.quickPickEnv()
+
+            // tslint:disable-next-line: no-unused-expression
+            this._env && (await this.addTagByTags(this._env))
+
+            this._logger(`env: ${this._env}`)
+            this._logger(`path: ${this._path}`)
+          } catch (err) {
+            log.error(err.message || err)
+            window.showErrorMessage(err.message || err)
+          }
+        },
+      )
     })
   }
   // #endregion
 
   // #region simple git
   git(command: string, ...config: any) {
+    let that = this
     return new Promise((resolve, reject) => {
       simplegit(this._path || process.cwd())[command](...config, function(error: any, result: any) {
-        log.info(`> git ${command} ${JSON.stringify(config)}`)
-        log.info(result || error)
+        that._logger(`> git ${command} ${JSON.stringify(config)}`)
+        that._logger(result || error)
         return error ? reject(error) : resolve(result)
       })
     })
@@ -114,12 +132,12 @@ export class Tag {
           this._path = this._folders[0].path
         } else {
           let commandFolder = await showQuickPick(this._folders)
-          log.info(`选择的目录: ${JSON.stringify(commandFolder)}`)
+          this._logger(`选择的目录: ${JSON.stringify(commandFolder)}`)
           if (commandFolder) {
             this._path = commandFolder.path
           } else {
-            window.showInformationMessage('获取目录信息失败，正在重试...')
-            log.info('获取目录信息失败，正在重试...')
+            // window.showInformationMessage('获取目录信息失败，正在重试...')
+            this._logger('获取目录信息失败，正在重试...')
             await this.quickPickPath()
           }
         }
@@ -138,12 +156,12 @@ export class Tag {
   async quickPickEnv() {
     try {
       let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
-      log.info(`选择的环境: ${JSON.stringify(commandEnv)}`)
+      this._logger(`选择的环境: ${JSON.stringify(commandEnv)}`)
       if (commandEnv) {
         this._env = commandEnv.label
       } else {
-        window.showInformationMessage('获取环境信息失败，正在重试...')
-        log.info('获取环境信息失败，正在重试...')
+        // window.showInformationMessage('获取环境信息失败，正在重试...')
+        this._logger('获取环境信息失败，正在重试...')
         await this.quickPickEnv()
       }
     } catch (error) {
@@ -159,102 +177,83 @@ export class Tag {
    * @memberof Tag
    */
   async addTagByTags(env: string) {
-    window.withProgress(
-      {
-        location: ProgressLocation.Notification,
-        title: '创建Tag',
-        cancellable: true,
-      },
-      async (progress, token) => {
-        const logger = async (text: string) => {
-          progress.report({ message: text })
-          log.info(text)
-        }
+    try {
+      // await this.git('listRemote')
+      // await this.git('log')
 
-        try {
-          token.onCancellationRequested(() => window.showInformationMessage(`🏷 取消创建`))
+      // #region 获取tag列表
+      this._logger('开始检查是否有未提交的变更')
+      await this.commitAllFiles()
 
-          // await this.git('listRemote')
-          // await this.git('log')
+      this._logger('开始拉取最新的变更')
+      await this.git('pull', { '--rebase': 'true' })
 
-          // #region 获取tag列表
-          logger('开始检查是否有未提交的变更')
-          await this.commitAllFiles()
+      this._logger('开始获取所有tag')
+      interface Tags {
+        latest?: string
+        all?: string[]
+      }
+      // const tags: Tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
+      const tags: Tags = await this.git('tags')
+      this._logger(`> git tags`)
+      this._logger(JSON.stringify(tags))
+      // #endregion
 
-          logger('开始拉取最新的变更')
-          await this.git('pull', { '--rebase': 'true' })
+      // #region addTagSingle
+      let addTagSingle = async (envName: string) => {
+        // 当前环境的最大版本号
+        let lastVsersion = '0.0.0'
+        let tagReg = /^(\w+)-v((\d+\.?)+)-(\d{8})$/gi
 
-          logger('开始获取所有tag')
-          interface Tags {
-            latest?: string
-            all?: string[]
-          }
-          // const tags: Tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
-          const tags: Tags = await this.git('tags')
-          logger(`> git tags`)
-          logger(JSON.stringify(tags))
-          // #endregion
+        // 当前环境的版本号列表过滤
+        let versions = tags.all
+          ? tags.all.filter((item: any) => {
+              return tagReg.test(item)
+                ? item.replace(tagReg, (...arg: any) => {
+                    let matchStr = arg[0] || ''
+                    let tagEnv = arg[1] || ''
 
-          // #region addTagSingle
-          let addTagSingle = async (envName: string) => {
-            // 当前环境的最大版本号
-            let lastVsersion = '0.0.0'
-            let tagReg = /^(\w+)-v((\d+\.?)+)-(\d{8})$/gi
+                    // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是qa
+                    if (envName === 'qa' && /dev.*|qa/.test(tagEnv)) {
+                      envName = tagEnv
+                    }
+                    if (tagEnv !== envName) {
+                      return ''
+                    }
 
-            // 当前环境的版本号列表过滤
-            let versions = tags.all
-              ? tags.all.filter((item: any) => {
-                  return tagReg.test(item)
-                    ? item.replace(tagReg, (...arg: any) => {
-                        let matchStr = arg[0] || ''
-                        let tagEnv = arg[1] || ''
+                    // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
+                    this._logger(`格式化版本号: ${matchStr}`)
+                    let tagVersion =
+                      semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1')) || '') ||
+                      lastVsersion
 
-                        // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是qa
-                        if (envName === 'qa' && /dev.*|qa/.test(tagEnv)) {
-                          envName = tagEnv
-                        }
-                        if (tagEnv !== envName) {
-                          return ''
-                        }
+                    // 比较版本号，记录最大版本号
+                    this._logger(`比较版本号: ${tagVersion} & ${lastVsersion}`)
+                    lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
+                    return matchStr
+                  })
+                : false
+            })
+          : []
+        window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`  /  `)}`)
 
-                        // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
-                        logger(`格式化版本号: ${matchStr}`)
-                        let tagVersion =
-                          semver.valid(
-                            semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1')) || '',
-                          ) || lastVsersion
+        let version = await this.generateNewTag(envName, lastVsersion)
+        this._logger(`生成新版本号: ${JSON.stringify(version)}`)
 
-                        // 比较版本号，记录最大版本号
-                        logger(`比较版本号: ${tagVersion} & ${lastVsersion}`)
-                        lastVsersion = semver.gt(tagVersion, lastVsersion)
-                          ? tagVersion
-                          : lastVsersion
-                        return matchStr
-                      })
-                    : false
-                })
-              : []
-            window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`  /  `)}`)
+        await this.addTag([version])
+      }
+      // #endregion
 
-            let version = await this.generateNewTag(envName, lastVsersion)
-            logger(`生成新版本号: ${JSON.stringify(version)}`)
-
-            await this.addTag([version])
-          }
-          // #endregion
-
-          return env === 'all'
-            ? await Promise.all(
-                COMMAND_DEFINITIONS.map(item =>
-                  item.versionName ? addTagSingle(item.label) : Promise.resolve(),
-                ),
-              )
-            : [await addTagSingle(env)]
-        } catch (error) {
-          log.error(error.message || error)
-        }
-      },
-    )
+      return env === 'all'
+        ? await Promise.all(
+            COMMAND_DEFINITIONS.map(item =>
+              item.versionName ? addTagSingle(item.label) : Promise.resolve(),
+            ),
+          )
+        : [await addTagSingle(env)]
+    } catch (error) {
+      log.error(error.message || error)
+    }
   }
   // #endregion
 
