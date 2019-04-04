@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-04-04 14:15:46
+ * @LastEditTime: 2019-04-04 14:29:15
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -125,28 +125,25 @@ export class Tag {
    * @memberof Tag
    */
   async quickPickPath() {
-    try {
-      this._logger('开始获取目录列表')
-      this._folders = getWorkspaceFolders()
+    this._logger('开始获取目录列表')
+    this._folders = getWorkspaceFolders()
 
-      if (this._folders.length > 0) {
-        if (this._folders.length === 1) {
-          this._path = this._folders[0].path
+    if (this._folders.length > 0) {
+      if (this._folders.length === 1) {
+        this._path = this._folders[0].path
+      } else {
+        this._logger('选择目录...')
+        let commandFolder = await showQuickPick(this._folders)
+        this._logger(`选择的目录: ${JSON.stringify(commandFolder)}`)
+        if (commandFolder) {
+          this._path = commandFolder.path
+          return commandFolder
         } else {
-          this._logger('选择目录...')
-          let commandFolder = await showQuickPick(this._folders)
-          this._logger(`选择的目录: ${JSON.stringify(commandFolder)}`)
-          if (commandFolder) {
-            this._path = commandFolder.path
-          } else {
-            // this._logger('获取目录信息失败，正在重试...')
-            // await this.quickPickPath()
-            throw new Error('Sorry！获取目录信息失败，请重试...')
-          }
+          // this._logger('获取目录信息失败，正在重试...')
+          // await this.quickPickPath()
+          throw new Error('Sorry！获取目录信息失败，请重试...')
         }
       }
-    } catch (error) {
-      log.error(error.message || error)
     }
   }
   // #endregion
@@ -157,19 +154,16 @@ export class Tag {
    * @memberof Tag
    */
   async quickPickEnv() {
-    try {
-      this._logger('选择环境...')
-      let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
-      this._logger(`选择的环境: ${JSON.stringify(commandEnv)}`)
-      if (commandEnv) {
-        this._env = commandEnv.label
-      } else {
-        // this._logger('Sorry！获取环境信息失败，正在重试...')
-        // await this.quickPickEnv()
-        throw new Error('Sorry！获取环境信息失败，请重试...')
-      }
-    } catch (error) {
-      log.error(error.message || error)
+    this._logger('选择环境...')
+    let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
+    this._logger(`选择的环境: ${JSON.stringify(commandEnv)}`)
+    if (commandEnv) {
+      this._env = commandEnv.label
+      return commandEnv
+    } else {
+      // this._logger('Sorry！获取环境信息失败，正在重试...')
+      // await this.quickPickEnv()
+      throw new Error('Sorry！获取环境信息失败，请重试...')
     }
   }
   // #endregion
@@ -181,83 +175,79 @@ export class Tag {
    * @memberof Tag
    */
   async addTagByTags(env: string) {
-    try {
-      // await this.git('listRemote')
-      // await this.git('log')
+    // await this.git('listRemote')
+    // await this.git('log')
 
-      // #region 获取tag列表
-      this._logger('开始检查是否有未提交的变更')
-      await this.commitAllFiles()
+    // #region 获取tag列表
+    this._logger('开始检查是否有未提交的变更')
+    await this.commitAllFiles()
 
-      this._logger('开始拉取最新的变更')
-      await this.git('pull', { '--rebase': 'true' })
+    this._logger('开始拉取最新的变更')
+    await this.git('pull', { '--rebase': 'true' })
 
-      this._logger('开始获取所有tag')
-      interface Tags {
-        latest?: string
-        all?: string[]
-      }
-      // const tags: Tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
-      const tags: Tags = await this.git('tags')
-      this._logger(`> git tags`)
-      this._logger(JSON.stringify(tags))
-      // #endregion
-
-      // #region addTagSingle
-      let addTagSingle = async (envName: string) => {
-        // 当前环境的最大版本号
-        let lastVsersion = '0.0.0'
-        let tagReg = /^(\w+)-v((\d+\.?)+)-(\d{8})$/gi
-
-        // 当前环境的版本号列表过滤
-        let versions = tags.all
-          ? tags.all.filter((item: any) => {
-              return tagReg.test(item)
-                ? item.replace(tagReg, (...arg: any) => {
-                    let matchStr = arg[0] || ''
-                    let tagEnv = arg[1] || ''
-
-                    // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是qa
-                    if (envName === 'qa' && /dev.*|qa/.test(tagEnv)) {
-                      envName = tagEnv
-                    }
-                    if (tagEnv !== envName) {
-                      return ''
-                    }
-
-                    // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
-                    this._logger(`格式化版本号: ${matchStr}`)
-                    let tagVersion =
-                      semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1')) || '') ||
-                      lastVsersion
-
-                    // 比较版本号，记录最大版本号
-                    this._logger(`比较版本号: ${tagVersion} & ${lastVsersion}`)
-                    lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
-                    return matchStr
-                  })
-                : false
-            })
-          : []
-        window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`  /  `)}`)
-
-        let version = await this.generateNewTag(envName, lastVsersion)
-        this._logger(`生成新版本号: ${JSON.stringify(version)}`)
-
-        await this.addTag([version])
-      }
-      // #endregion
-
-      return env === 'all'
-        ? await Promise.all(
-            COMMAND_DEFINITIONS.map(item =>
-              item.versionName ? addTagSingle(item.label) : Promise.resolve(),
-            ),
-          )
-        : [await addTagSingle(env)]
-    } catch (error) {
-      log.error(error.message || error)
+    this._logger('开始获取所有tag')
+    interface Tags {
+      latest?: string
+      all?: string[]
     }
+    // const tags: Tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
+    const tags: Tags = await this.git('tags')
+    this._logger(`> git tags`)
+    this._logger(JSON.stringify(tags))
+    // #endregion
+
+    // #region addTagSingle
+    let addTagSingle = async (envName: string) => {
+      // 当前环境的最大版本号
+      let lastVsersion = '0.0.0'
+      let tagReg = /^(\w+)-v((\d+\.?)+)-(\d{8})$/gi
+
+      // 当前环境的版本号列表过滤
+      let versions = tags.all
+        ? tags.all.filter((item: any) => {
+            return tagReg.test(item)
+              ? item.replace(tagReg, (...arg: any) => {
+                  let matchStr = arg[0] || ''
+                  let tagEnv = arg[1] || ''
+
+                  // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是qa
+                  if (envName === 'qa' && /dev.*|qa/.test(tagEnv)) {
+                    envName = tagEnv
+                  }
+                  if (tagEnv !== envName) {
+                    return ''
+                  }
+
+                  // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
+                  this._logger(`格式化版本号: ${matchStr}`)
+                  let tagVersion =
+                    semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1')) || '') ||
+                    lastVsersion
+
+                  // 比较版本号，记录最大版本号
+                  this._logger(`比较版本号: ${tagVersion} & ${lastVsersion}`)
+                  lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
+                  return matchStr
+                })
+              : false
+          })
+        : []
+      window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`  /  `)}`)
+
+      let version = await this.generateNewTag(envName, lastVsersion)
+      this._logger(`生成新版本号: ${JSON.stringify(version)}`)
+
+      await this.addTag([version])
+    }
+    // #endregion
+
+    return env === 'all'
+      ? await Promise.all(
+          COMMAND_DEFINITIONS.map(item =>
+            item.versionName ? addTagSingle(item.label) : Promise.resolve(),
+          ),
+        )
+      : [await addTagSingle(env)]
   }
   // #endregion
 
@@ -267,20 +257,16 @@ export class Tag {
    * @memberof Tag
    */
   async commitAllFiles() {
-    try {
-      this._logger('检查是否有未提交的变更')
-      let statusSummary: any = await this.git('status')
-      if (statusSummary.files.length) {
-        window.showWarningMessage('🚨 发现未提交的文件变更已提交')
-        this._logger('🚨 发现未提交的文件变更已提交')
-        await this.git('add', './*')
-        await this.git('commit', '🚀  🔖')
-        let branchSummary: any = await this.git('branch')
-        this._logger('处理未提交的文件变更...')
-        await this.git('push', 'origin', branchSummary.current)
-      }
-    } catch (error) {
-      log.error(error.message || error)
+    this._logger('检查是否有未提交的变更')
+    let statusSummary: any = await this.git('status')
+    if (statusSummary.files.length) {
+      window.showWarningMessage('🚨 发现未提交的文件变更已提交')
+      this._logger('🚨 发现未提交的文件变更已提交')
+      await this.git('add', './*')
+      await this.git('commit', '🚀  🔖')
+      let branchSummary: any = await this.git('branch')
+      this._logger('处理未提交的文件变更...')
+      return await this.git('push', 'origin', branchSummary.current)
     }
   }
   // #endregion
@@ -292,17 +278,19 @@ export class Tag {
    * @memberof Tag
    */
   async addTag(versions: Array<Version>) {
-    try {
-      await this.git('pull', { '--rebase': 'true' })
+    await this.git('pull', { '--rebase': 'true' })
 
-      versions.forEach(async (version: Version) => {
-        await this.git('addTag', version.tag)
-        window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
-        await this.git('pushTags', 'origin')
-      })
-    } catch (error) {
-      log.error(error.message || error)
+    let asyncFuncs: Promise<Version>[] = []
+    let addTagHandler = async (version: Version) => {
+      await this.git('addTag', version.tag)
+      window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
+      await this.git('pushTags', 'origin')
+      return version
     }
+
+    versions.forEach((version: Version) => asyncFuncs.push(addTagHandler(version)))
+
+    return await Promise.all(asyncFuncs)
   }
   // #endregion
 
