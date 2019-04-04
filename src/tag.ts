@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-04-04 15:00:09
+ * @LastEditTime: 2019-04-04 15:08:43
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -341,7 +341,7 @@ export class Tag {
           config.version = semver.inc(version, 'patch') || '0.0.0'
         }
         config.tag = `${env}-v${config.version}-${date}`
-        this._logger(`标签生成 ${config}`)
+        this._logger(`标签生成 ${config.tag}`)
         resolve(config)
       } catch (error) {
         log.error(error.message || error)
