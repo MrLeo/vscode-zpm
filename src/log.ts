@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description:
  * @Date: 2019-03-25 09:27:06
- * @LastEditTime: 2019-03-25 18:00:09
+ * @LastEditTime: 2019-04-04 14:15:58
  */
 
 import { window, OutputChannel } from 'vscode'
@@ -82,5 +82,6 @@ export default class Logger extends LoggerBase {
   error(message: any): void {
     console.log('TCL: Logger -> message', message)
     this.appendLine(message, 'error')
+    window.showErrorMessage(message)
   }
 }

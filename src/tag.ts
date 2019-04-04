@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-04-04 13:43:55
+ * @LastEditTime: 2019-04-04 14:15:46
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -78,14 +78,16 @@ export class Tag {
           cancellable: true,
         },
         async (progress, token) => {
-          token.onCancellationRequested(() => window.showInformationMessage(`🏷 取消创建`))
+          token.onCancellationRequested(() => {
+            log.error('🏷 取消创建')
+          })
 
           this._logger = async (text: string) => {
             progress.report({ message: text })
             log.info(text)
           }
-
           this._logger('register command')
+
           try {
             await this.quickPickPath()
             await this.quickPickEnv()
@@ -97,7 +99,6 @@ export class Tag {
             this._logger(`path: ${this._path}`)
           } catch (err) {
             log.error(err.message || err)
-            window.showErrorMessage(err.message || err)
           }
         },
       )
@@ -125,20 +126,22 @@ export class Tag {
    */
   async quickPickPath() {
     try {
+      this._logger('开始获取目录列表')
       this._folders = getWorkspaceFolders()
 
       if (this._folders.length > 0) {
         if (this._folders.length === 1) {
           this._path = this._folders[0].path
         } else {
+          this._logger('选择目录...')
           let commandFolder = await showQuickPick(this._folders)
           this._logger(`选择的目录: ${JSON.stringify(commandFolder)}`)
           if (commandFolder) {
             this._path = commandFolder.path
           } else {
-            // window.showInformationMessage('获取目录信息失败，正在重试...')
-            this._logger('获取目录信息失败，正在重试...')
-            await this.quickPickPath()
+            // this._logger('获取目录信息失败，正在重试...')
+            // await this.quickPickPath()
+            throw new Error('Sorry！获取目录信息失败，请重试...')
           }
         }
       }
@@ -155,14 +158,15 @@ export class Tag {
    */
   async quickPickEnv() {
     try {
+      this._logger('选择环境...')
       let commandEnv: QuickPickItem = await showQuickPick(COMMAND_DEFINITIONS)
       this._logger(`选择的环境: ${JSON.stringify(commandEnv)}`)
       if (commandEnv) {
         this._env = commandEnv.label
       } else {
-        // window.showInformationMessage('获取环境信息失败，正在重试...')
-        this._logger('获取环境信息失败，正在重试...')
-        await this.quickPickEnv()
+        // this._logger('Sorry！获取环境信息失败，正在重试...')
+        // await this.quickPickEnv()
+        throw new Error('Sorry！获取环境信息失败，请重试...')
       }
     } catch (error) {
       log.error(error.message || error)
@@ -264,12 +268,15 @@ export class Tag {
    */
   async commitAllFiles() {
     try {
+      this._logger('检查是否有未提交的变更')
       let statusSummary: any = await this.git('status')
       if (statusSummary.files.length) {
-        window.showWarningMessage('🚨 有未提交的文件变更已提交')
+        window.showWarningMessage('🚨 发现未提交的文件变更已提交')
+        this._logger('🚨 发现未提交的文件变更已提交')
         await this.git('add', './*')
         await this.git('commit', '🚀  🔖')
         let branchSummary: any = await this.git('branch')
+        this._logger('处理未提交的文件变更...')
         await this.git('push', 'origin', branchSummary.current)
       }
     } catch (error) {
