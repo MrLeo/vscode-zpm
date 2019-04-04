@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-04-04 15:08:43
+ * @LastEditTime: 2019-04-04 15:12:19
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -185,6 +185,7 @@ export class Tag {
 
     await this.commitAllFiles()
     await this.pull()
+    await this.getTags()
 
     return env === 'all'
       ? await Promise.all(
