@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-04-04 14:33:37
+ * @LastEditTime: 2019-04-04 15:00:09
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -26,6 +26,10 @@ export interface Version {
   env?: string // 环境
   tag?: string // 标签
   version?: string // 版本号
+}
+interface Tags {
+  latest?: string
+  all: string[]
 }
 // #endregion
 
@@ -63,10 +67,11 @@ export const COMMAND_DEFINITIONS: QuickPickItem[] = [
 @command()
 export class Tag {
   private _disposable: Disposable
+  private _logger: any
   private _env?: string
   private _path?: string
   private _folders: QuickPickItem[] = []
-  private _logger: any
+  private _tags: Tags = { all: [], latest: '' }
 
   // #region 构造函数
   constructor() {
@@ -178,76 +183,16 @@ export class Tag {
     // await this.git('listRemote')
     // await this.git('log')
 
-    // #region 获取tag列表
-    this._logger('开始检查是否有未提交的变更')
     await this.commitAllFiles()
-
-    this._logger('开始拉取最新的变更')
-    await this.git('pull', { '--rebase': 'true' })
-
-    this._logger('开始获取所有tag')
-    interface Tags {
-      latest?: string
-      all?: string[]
-    }
-    // const tags: Tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
-    const tags: Tags = await this.git('tags')
-    this._logger(`> git tags`)
-    this._logger(JSON.stringify(tags))
-    // #endregion
-
-    // #region addTagSingle
-    let addTagSingle = async (envName: string) => {
-      // 当前环境的最大版本号
-      let lastVsersion = '0.0.0'
-      let tagReg = /^(\w+)-v((\d+\.?)+)-(\d{8})$/gi
-
-      // 当前环境的版本号列表过滤
-      let versions = tags.all
-        ? tags.all.filter((item: any) => {
-            return tagReg.test(item)
-              ? item.replace(tagReg, (...arg: any) => {
-                  let matchStr = arg[0] || ''
-                  let tagEnv = arg[1] || ''
-
-                  // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是qa
-                  if (envName === 'qa' && /dev.*|qa/.test(tagEnv)) {
-                    envName = tagEnv
-                  }
-                  if (tagEnv !== envName) {
-                    return ''
-                  }
-
-                  // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
-                  this._logger(`格式化版本号: ${matchStr}`)
-                  let tagVersion =
-                    semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1')) || '') ||
-                    lastVsersion
-
-                  // 比较版本号，记录最大版本号
-                  this._logger(`比较版本号: ${tagVersion} & ${lastVsersion}`)
-                  lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
-                  return matchStr
-                })
-              : false
-          })
-        : []
-      window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`  /  `)}`)
-
-      let version = await this.generateNewTag(envName, lastVsersion)
-      this._logger(`生成新版本号: ${JSON.stringify(version)}`)
-
-      await this.addTag([version])
-    }
-    // #endregion
+    await this.pull()
 
     return env === 'all'
       ? await Promise.all(
           COMMAND_DEFINITIONS.map(item =>
-            item.versionName ? addTagSingle(item.label) : Promise.resolve(),
+            item.versionName ? this.addTagPre(item.label) : Promise.resolve(),
           ),
         )
-      : [await addTagSingle(env)]
+      : [await this.addTagPre(env)]
   }
   // #endregion
 
@@ -268,6 +213,91 @@ export class Tag {
       this._logger('处理未提交的文件变更...')
       return await this.git('push', 'origin', branchSummary.current)
     }
+    return Promise.resolve()
+  }
+  // #endregion
+
+  // #region 拉取更新
+  /**
+   * 拉取更新
+   *
+   * @returns
+   * @memberof Tag
+   */
+  async pull() {
+    this._logger('开始拉取最新的变更')
+    return await this.git('pull', { '--rebase': 'true' })
+  }
+  // #endregion
+
+  // #region 获取tag list
+  /**
+   * 获取tag list
+   *
+   * @returns
+   * @memberof Tag
+   */
+  async getTags() {
+    this._logger('开始获取所有tag')
+
+    // const tags: Tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
+    const tags: any = await this.git('tags')
+    this._tags = tags
+
+    this._logger(`> git tags`)
+    this._logger(JSON.stringify(tags))
+
+    return tags
+  }
+  // #endregion
+
+  // #region 添加标签预处理
+  /**
+   * 添加标签预处理
+   * @param {string} envName
+   * @memberof Tag
+   */
+  async addTagPre(envName: string) {
+    this._logger('处理标签...')
+
+    // 当前环境的最大版本号
+    let lastVsersion = '0.0.0'
+    let tagReg = /^(\w+)-v((\d+\.?)+)-(\d{8})$/gi
+
+    // 当前环境的版本号列表过滤
+    let versions = this._tags.all.filter((item: any) => {
+      return tagReg.test(item)
+        ? item.replace(tagReg, (...arg: any) => {
+            let matchStr = arg[0] || ''
+            let tagEnv = arg[1] || ''
+
+            // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是qa
+            if (envName === 'qa' && /dev.*|qa/.test(tagEnv)) {
+              envName = tagEnv
+            }
+            if (tagEnv !== envName) {
+              return ''
+            }
+
+            // 格式化版本号，将诸如 0.0.01.001 中多余的 0 去掉
+            this._logger(`格式化版本号: ${matchStr}`)
+            let tagVersion =
+              semver.valid(semver.coerce(arg[2].replace(/\.0+(\d|0\.)/g, '.$1')) || '') ||
+              lastVsersion
+
+            // 比较版本号，记录最大版本号
+            this._logger(`比较版本号: ${tagVersion} & ${lastVsersion}`)
+            lastVsersion = semver.gt(tagVersion, lastVsersion) ? tagVersion : lastVsersion
+            return matchStr
+          })
+        : false
+    })
+    window.showInformationMessage(`🏷 当前环境的版本号列表:\r\n ${versions.join(`  /  `)}`)
+
+    let version = await this.generateNewTag(envName, lastVsersion)
+    this._logger(`生成新版本号: ${JSON.stringify(version)}`)
+
+    await this.addTag(version)
   }
   // #endregion
 
@@ -277,17 +307,12 @@ export class Tag {
    * @param {Array<Version>} versions
    * @memberof Tag
    */
-  async addTag(versions: Array<Version>) {
-    let addTagHandler = async (version: Version) => {
-      await this.git('addTag', version.tag)
-      window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
-      await this.git('pushTags', 'origin')
-      return version
-    }
-
-    let asyncFuncs: Promise<Version>[] = []
-    versions.forEach((version: Version) => asyncFuncs.push(addTagHandler(version)))
-    return await Promise.all(asyncFuncs)
+  async addTag(version: Version) {
+    this._logger(`添加标签 ${version.tag || ''}`)
+    await this.git('addTag', version.tag)
+    window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
+    await this.git('pushTags', 'origin')
+    return version
   }
   // #endregion
 
@@ -302,6 +327,7 @@ export class Tag {
   generateNewTag(env: string = 'pre', version: string = '0.0.0') {
     return new Promise((resolve, reject) => {
       try {
+        this._logger(`生成标签 ${env} ${version}`)
         // const major = semver.major(version)
         const minor = semver.minor(version)
         const patch = semver.patch(version)
@@ -315,6 +341,7 @@ export class Tag {
           config.version = semver.inc(version, 'patch') || '0.0.0'
         }
         config.tag = `${env}-v${config.version}-${date}`
+        this._logger(`标签生成 ${config}`)
         resolve(config)
       } catch (error) {
         log.error(error.message || error)
