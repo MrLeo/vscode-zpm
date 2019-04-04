@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-04-04 14:29:15
+ * @LastEditTime: 2019-04-04 14:33:37
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -278,9 +278,6 @@ export class Tag {
    * @memberof Tag
    */
   async addTag(versions: Array<Version>) {
-    await this.git('pull', { '--rebase': 'true' })
-
-    let asyncFuncs: Promise<Version>[] = []
     let addTagHandler = async (version: Version) => {
       await this.git('addTag', version.tag)
       window.showInformationMessage(`🔖 添加新Tag: ${version.tag}`, version.tag || '')
@@ -288,8 +285,8 @@ export class Tag {
       return version
     }
 
+    let asyncFuncs: Promise<Version>[] = []
     versions.forEach((version: Version) => asyncFuncs.push(addTagHandler(version)))
-
     return await Promise.all(asyncFuncs)
   }
   // #endregion
