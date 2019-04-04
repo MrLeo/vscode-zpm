@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-04-04 11:36:48
+ * @LastEditTime: 2019-04-04 12:15:49
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -118,6 +118,9 @@ export class Tag {
           if (commandFolder) {
             this._path = commandFolder.path
           }
+          window.showInformationMessage('获取目录信息失败，正在重试...')
+          log.info('获取目录信息失败，正在重试...')
+          await this.quickPickPath()
         }
       }
     } catch (error) {
@@ -138,6 +141,9 @@ export class Tag {
       if (commandEnv) {
         this._env = commandEnv.label
       }
+      window.showInformationMessage('获取环境信息失败，正在重试...')
+      log.info('获取环境信息失败，正在重试...')
+      await this.quickPickEnv()
     } catch (error) {
       log.error(error.message || error)
     }
