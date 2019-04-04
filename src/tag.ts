@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-04-04 12:15:49
+ * @LastEditTime: 2019-04-04 12:19:39
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -117,10 +117,11 @@ export class Tag {
           log.info(`选择的目录: ${JSON.stringify(commandFolder)}`)
           if (commandFolder) {
             this._path = commandFolder.path
+          } else {
+            window.showInformationMessage('获取目录信息失败，正在重试...')
+            log.info('获取目录信息失败，正在重试...')
+            await this.quickPickPath()
           }
-          window.showInformationMessage('获取目录信息失败，正在重试...')
-          log.info('获取目录信息失败，正在重试...')
-          await this.quickPickPath()
         }
       }
     } catch (error) {
@@ -140,10 +141,11 @@ export class Tag {
       log.info(`选择的环境: ${JSON.stringify(commandEnv)}`)
       if (commandEnv) {
         this._env = commandEnv.label
+      } else {
+        window.showInformationMessage('获取环境信息失败，正在重试...')
+        log.info('获取环境信息失败，正在重试...')
+        await this.quickPickEnv()
       }
-      window.showInformationMessage('获取环境信息失败，正在重试...')
-      log.info('获取环境信息失败，正在重试...')
-      await this.quickPickEnv()
     } catch (error) {
       log.error(error.message || error)
     }
