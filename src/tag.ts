@@ -5,11 +5,18 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-04-04 15:12:19
+ * @LastEditTime: 2019-05-07 11:20:16
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
-import { Commands, command, showQuickPick, QuickPickItem, getWorkspaceFolders } from './common'
+import {
+  Commands,
+  command,
+  showQuickPick,
+  QuickPickItem,
+  getWorkspaceFolders,
+  sleep,
+} from './common'
 
 import * as fs from 'fs'
 import * as semver from 'semver'
@@ -95,6 +102,10 @@ export class Tag {
 
           try {
             await this.quickPickPath()
+            if (this._folders.length === 0) {
+              await sleep(800)
+              await this.quickPickPath()
+            }
             await this.quickPickEnv()
 
             // tslint:disable-next-line: no-unused-expression

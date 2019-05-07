@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 通用方法
  * @Date: 2019-03-13 20:17:45
- * @LastEditTime: 2019-03-18 17:35:13
+ * @LastEditTime: 2019-05-07 11:19:38
  */
 
 import { ExtensionContext, window, workspace, WorkspaceFolder } from 'vscode'
@@ -97,4 +97,9 @@ export function getWorkspaceFolders() {
     }
   })
 }
+// #endregion
+
+// #region sleep
+export const sleep = async (timmer: number = 1000) =>
+  new Promise(resolve => setTimeout(async () => resolve, timmer))
 // #endregion
