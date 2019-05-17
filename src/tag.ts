@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-05-17 09:38:49
+ * @LastEditTime: 2019-05-17 09:44:13
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -108,7 +108,7 @@ export class Tag {
           try {
             await this.quickPickPath()
             if (this._folders.length === 0) {
-              await sleep(800)
+              await sleep(1000)
               await this.quickPickPath()
             }
             await this.quickPickEnv()
