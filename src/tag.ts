@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-05-07 11:20:16
+ * @LastEditTime: 2019-05-17 09:38:49
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -44,18 +44,23 @@ interface Tags {
 export const COMMAND_DEFINITIONS: QuickPickItem[] = [
   {
     label: 'master',
-    description: '线上环境',
+    description: 'master: 线上',
     versionName: 'version',
   },
   {
     label: 'pre',
-    description: '预上线环境',
+    description: 'pre: 预上线',
     versionName: 'version_pre',
   },
   {
     label: 'qa',
-    description: 'QA测试环境',
+    description: 'qa: 测试',
     versionName: 'version_qa',
+  },
+  {
+    label: 'dev',
+    description: 'dev: 开发',
+    versionName: 'version_dev',
   },
   {
     label: 'all',
@@ -283,10 +288,6 @@ export class Tag {
             let matchStr = arg[0] || ''
             let tagEnv = arg[1] || ''
 
-            // 因为新老QA的tag前缀不同，为了兼容则根据已经创建的tag前缀来创建，默认QA的tag前缀是qa
-            if (envName === 'qa' && /dev.*|qa/.test(tagEnv)) {
-              envName = tagEnv
-            }
             if (tagEnv !== envName) {
               return ''
             }
