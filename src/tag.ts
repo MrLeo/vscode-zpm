@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-08-02 12:58:15
+ * @LastEditTime: 2019-08-02 17:43:09
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -259,7 +259,8 @@ export class Tag {
 
     // const tags: Tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
     const tags: any = await this.git('tags')
-    this._tags = tags.resolve()
+    tags.all = tags.all.reverse()
+    this._tags = tags
 
     this._logger(`> git tags`)
     this._logger(JSON.stringify(tags))
