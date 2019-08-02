@@ -30,7 +30,7 @@
     "commands": [
       {
         "command": "extension.tag",
-        "title": "zpm: 创建Tag 🔖 "
+        "title": "zpm: 创建Tag  🔖 "
       }
     ],
     "snippets": [

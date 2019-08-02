@@ -5,7 +5,7 @@
  * @version: 0.0.0
  * @Description: 🔖 创建Tag
  * @Date: 2019-03-13 16:04:30
- * @LastEditTime: 2019-05-17 09:44:13
+ * @LastEditTime: 2019-08-02 11:48:29
  */
 
 import { commands, Disposable, window, ProgressLocation } from 'vscode'
@@ -259,7 +259,7 @@ export class Tag {
 
     // const tags: Tags = fs.readdirSync(`${this._path}/.git/refs/tags`) || [] // 从本地文件读取tag
     const tags: any = await this.git('tags')
-    this._tags = tags
+    this._tags = tags.resolve()
 
     this._logger(`> git tags`)
     this._logger(JSON.stringify(tags))
@@ -279,7 +279,7 @@ export class Tag {
 
     // 当前环境的最大版本号
     let lastVsersion = '0.0.0'
-    let tagReg = /^(\w+)-v((\d+\.?)+)-(\d{8})$/gi
+    let tagReg = /^(\w+)-v?((\d+\.?)+)-(\d+)$/gi
 
     // 当前环境的版本号列表过滤
     let versions = this._tags.all.filter((item: any) => {
@@ -337,7 +337,7 @@ export class Tag {
    * @returns [version='0.0.1'] 新版本号
    * @memberof Tag
    */
-  generateNewTag(env: string = 'pre', version: string = '0.0.0') {
+  generateNewTag(env: string = 'pre', version: string = '0.0.0'): Promise<Version> {
     return new Promise((resolve, reject) => {
       try {
         this._logger(`生成标签 ${env} ${version}`)
