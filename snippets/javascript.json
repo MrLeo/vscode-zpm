@@ -108,5 +108,28 @@
       "console.groupEnd()"
     ],
     "description": "Log output to console with group"
+  },
+  "stopBubble": {
+    "prefix": "stop",
+    "body": [
+      "function stopBubble(e) { ",
+      "  if ( e && e.stopPropagation ) e.stopPropagation(); ",
+      "  else window.event.cancelBubble = true; ",
+      "  $0",
+      "}"
+    ],
+    "description": "阻止冒泡"
+  },
+  "stopDefault": {
+    "prefix": "stop",
+    "body": [
+      "function stopDefault( e ) { ",
+      "  if ( e && e.preventDefault ) e.preventDefault(); ",
+      "  else window.event.returnValue = false; ",
+      "  $0",
+      "  return false; ",
+      "}"
+    ],
+    "description": "阻止浏览器默认行为"
   }
 }
