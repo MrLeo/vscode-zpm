@@ -11,12 +11,12 @@
   },
   "eslint-disable-line": {
     "prefix": "eslint",
-    "body": [" // eslint-disable-line"],
+    "body": ["// eslint-disable-line"],
     "description": "eslint忽略当前行"
   },
   "eslint-disable-next-line": {
     "prefix": "eslint",
-    "body": [" // eslint-disable-next-line"],
+    "body": ["// eslint-disable-next-line"],
     "description": "eslint忽略下一行"
   },
   "zpfe.init": {

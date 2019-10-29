@@ -11,12 +11,12 @@
   },
   "stylelint-disable-line": {
     "prefix": "stylelint",
-    "body": [" // stylelint-disable-line"],
+    "body": ["// stylelint-disable-line"],
     "description": "stylelint忽略当前行"
   },
   "stylelint-disable-next-line": {
     "prefix": "stylelint",
-    "body": [" // stylelint-disable-next-line"],
+    "body": ["// stylelint-disable-next-line"],
     "description": "stylelint忽略下一行"
   },
   "stylelint 定义BEM": {
