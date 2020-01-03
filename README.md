@@ -157,3 +157,14 @@
   ```javascript
   // stylelint-disable-next-line
   ```
+
+
+# 开发
+
+开启本地文件变更监听
+
+```shell
+npm run watch
+```
+
+开启调试模式`Extension Tests`
