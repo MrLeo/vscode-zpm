@@ -1,7 +1,7 @@
 {
   "name": "zpm",
   "displayName": "zpm",
-  "description": "ZPM vscode 插件",
+  "description": "常用的Git操作及代码片段",
   "keywords": [
     "zpm",
     "git",
@@ -12,7 +12,7 @@
   "publisher": "MrLeo",
   "icon": "logo.png",
   "engines": {
-    "vscode": "^1.32.0"
+		"vscode": "^1.41.0"
   },
   "homepage": "https://xuebin.me",
   "repository": {
@@ -24,13 +24,18 @@
   ],
   "main": "./dist/extension",
   "activationEvents": [
-    "onCommand:extension.tag"
+    "onCommand:extension.tag",
+    "onCommand:extension.tagRefresh"
   ],
   "contributes": {
     "commands": [
       {
         "command": "extension.tag",
         "title": "zpm: 创建Tag  🔖 "
+      },
+      {
+        "command": "extension.tagRefresh",
+        "title": "zpm: 删除远端不存在的Tag  ♻️ "
       }
     ],
     "snippets": [
@@ -48,10 +53,6 @@
       },
       {
         "language": "scss",
-        "path": "./snippets/css.json"
-      },
-      {
-        "language": "postcss",
         "path": "./snippets/css.json"
       }
     ]

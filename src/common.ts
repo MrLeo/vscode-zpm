@@ -49,6 +49,7 @@ export function registerCommands(context: ExtensionContext) {
 // #region Commands: 枚举 - 命令
 export enum Commands {
   tag = 'extension.tag',
+  tagRefresh = 'extension.tagRefresh',
 }
 // #endregion
 
