@@ -8,11 +8,11 @@
     "tag",
     "snippets"
   ],
-  "version": "1.0.3",
+  "version": "1.0.4",
   "publisher": "MrLeo",
   "icon": "logo.png",
   "engines": {
-		"vscode": "^1.41.0"
+    "vscode": "^1.41.0"
   },
   "homepage": "https://xuebin.me",
   "repository": {
