@@ -14,3 +14,4 @@ out/
 src/
 tsconfig.json
 webpack.config.json
+dist/**/*.map

@@ -7,6 +7,7 @@
 - [插件市场](https://marketplace.visualstudio.com/) / [插件管理](https://marketplace.visualstudio.com/manage)
 - [vscode 插件开发](https://xuebin.me/posts/a0508b9c.html)
 - [vscode api](https://code.visualstudio.com/api/references/vscode-api)
+- [使用 Webpack 优化 VS Code 插件加载性能](https://zhuanlan.zhihu.com/p/54428900)
 
 # 创建 tag
 
