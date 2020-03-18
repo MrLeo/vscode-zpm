@@ -23,12 +23,6 @@
     "prefix": "zpfe.init",
     "body": [
       "/*",
-      " * @Company: 智联招聘",
-      " * @Author: zhaopin.com",
-      " * @LastEditors: Leo",
-      " * @version: 0.0.0",
-      " * @Date: 2019-02-20 17:17:42",
-      " * @LastEditTime: 2019-02-20 17:18:40",
       " * @Description: $1",
       " */",
       "",
