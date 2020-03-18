@@ -169,3 +169,5 @@ npm run watch
 ```
 
 开启调试模式`Extension Tests`
+
+nga4wv2w3eve5snx2ndkoa5hn4qkbovckfdc4pwftnw77p4sbl5q
