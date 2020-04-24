@@ -26,14 +26,21 @@
       " * @Description: $1",
       " */",
       "",
-      "import { initHandler, responseSuccess, responseError } from '../../util'",
-      "// import ZPError from '../../util/error'",
+      "import { initHandler, responseSuccess, responseError, throwIfMiss } from '../../util'",
+      "import ZPError from '../../util/error'",
+      "",
+      "class ResponseData {",
+      "  constructor (total = 0, list = []) {",
+      "    this.total = total",
+      "    this.list = list",
+      "  }",
+      "}",
       "",
       "async function POST (ctx) {",
       "  try {",
-      "    const {querys,bodys,headers} = await initHandler(ctx)",
+      "    const { querys, bodys, headers } = await initHandler(ctx)",
       "",
-      "    const res = ${2:querys}",
+      "    const res = new ResponseData($3)",
       "",
       "    responseSuccess(ctx, res)",
       "  } catch (err) {",
@@ -45,7 +52,7 @@
       "  try {",
       "    const {querys,bodys,headers} = await initHandler(ctx, { checkAT: true })",
       "",
-      "    const res = ${3:querys}",
+      "    const res = new ResponseData($3)",
       "",
       "    responseSuccess(ctx, res)",
       "  } catch (err) {",
@@ -68,6 +75,13 @@
     "description": "ctx log error output"
   },
   "ZPError": {
+    "prefix": ["zpthrow"],
+    "body": [
+      "throw new ZPError(${1:res})"
+    ],
+    "description": "使用ZPError抛出异常"
+  },
+  "ZPError2": {
     "prefix": ["zpthrow"],
     "body": [
       "throw new ZPError({ code: ${1:res.code || 500}, message: ${2:res.message || '出错了'}, taskId: ${3:res.taskId || ctx.request.headers.get('x-zp-request-id') ||''} })"
