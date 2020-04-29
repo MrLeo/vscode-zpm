@@ -12,7 +12,7 @@ import { ExtensionContext, window, workspace, WorkspaceFolder } from 'vscode'
 
 // #region CommandConstructor: 接口 - 命令构造函数
 interface CommandConstructor {
-  new (): any
+  new (context?:ExtensionContext): any
 }
 // #endregion
 
@@ -41,7 +41,7 @@ export function command(): ClassDecorator {
  */
 export function registerCommands(context: ExtensionContext) {
   for (const c of registrableCommands) {
-    context.subscriptions.push(new c())
+    context.subscriptions.push(new c(context))
   }
 }
 // #endregion
@@ -50,6 +50,7 @@ export function registerCommands(context: ExtensionContext) {
 export enum Commands {
   tag = 'extension.tag',
   tagRefresh = 'extension.tagRefresh',
+  createNodeApi = 'extension.createNodeApi',
 }
 // #endregion
 

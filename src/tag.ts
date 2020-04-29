@@ -8,7 +8,7 @@
  * @LastEditTime: 2019-08-02 17:43:09
  */
 
-import { commands, Disposable, window, ProgressLocation } from 'vscode'
+import { commands, Disposable, window, ProgressLocation, ExtensionContext } from 'vscode'
 import {
   Commands,
   command,
@@ -86,7 +86,7 @@ export class Tag {
   private _tags: Tags = { all: [], latest: '' }
 
   // #region 构造函数
-  constructor() {
+  constructor(context?:ExtensionContext) {
     this._disposable = commands.registerCommand(Commands.tag, async (...args) => {
       window.withProgress(
         {
@@ -95,15 +95,13 @@ export class Tag {
           cancellable: true,
         },
         async (progress, token) => {
-          token.onCancellationRequested(() => {
-            log.error('🏷 取消创建')
-          })
+          token.onCancellationRequested(() => log.error('🏷 取消创建') )
 
           this._logger = async (text: string) => {
             progress.report({ message: text })
             log.info(text)
           }
-          this._logger('register command')
+          this._logger(`register command ${Commands.tag}`)
 
           try {
             await this.quickPickPath()
