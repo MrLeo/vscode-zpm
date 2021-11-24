@@ -18,17 +18,5 @@
     "prefix": "stylelint",
     "body": ["// stylelint-disable-next-line"],
     "description": "stylelint忽略下一行"
-  },
-  "stylelint 定义BEM": {
-    "prefix": "bem",
-    "body": [
-      "/* @define ${1:block};weak */",
-      "// #region ${1:block}",
-      ".${1:block} {",
-      "  $2",
-      "}",
-      "// #endregion"
-    ],
-    "description": "stylelint 定义BEM"
   }
 }

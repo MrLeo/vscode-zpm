@@ -5,7 +5,7 @@
 # 参考地址
 
 - [插件市场](https://marketplace.visualstudio.com/) / [插件管理](https://marketplace.visualstudio.com/manage)
-- [vscode 插件开发](https://xuebin.me/posts/a0508b9c.html)
+- [vscode 插件开发](https://leo.xuebin.me/posts/a0508b9c.html)
 - [vscode api](https://code.visualstudio.com/api/references/vscode-api)
 - [使用 Webpack 优化 VS Code 插件加载性能](https://zhuanlan.zhihu.com/p/54428900)
 
@@ -20,59 +20,6 @@
 # 代码片段
 
 ## javascript
-
-- zpfe.init
-
-  ```javascript
-  /*
-   * @Company: 智联招聘
-   * @Author: zhaopin.com
-   * @LastEditors: Leo
-   * @version: 0.0.0
-   * @Date: 2019-02-20 17:17:42
-   * @LastEditTime: 2019-02-20 17:18:40
-   * @Description:
-   */
-
-  import qs from 'qs'
-  import ZPError from '../../util/error'
-  import { initHandler, errorHandler, throwIfMiss } from '../../util/'
-  import request from '../../util/request'
-
-  async function POST(ctx) {
-    try {
-      const init = await initHandler(ctx, { checkAT: true })
-      let params = {
-        loginUserId: init.loginUserId,
-      }
-
-      let { data: res } = await request(ctx).post(`?${qs.stringify(params)}`)
-
-      ctx.response.body = res
-      // ctx.response.set({ code: 200, data: res, message: res.message || '成功', taskId: res.taskId || ctx.request.headers.get('x-zp-request-id') })
-    } catch (err) {
-      errorHandler(ctx, err)
-    }
-  }
-
-  async function GET(ctx) {
-    try {
-      const init = await initHandler(ctx, { checkAT: true })
-      let params = {
-        loginUserId: init.loginUserId,
-      }
-
-      let { data: res } = await request(ctx).get(``, { params })
-
-      ctx.response.body = res
-      // ctx.response.set({ code: 200, data: res, message: res.message || '成功', taskId: res.taskId || ctx.request.headers.get('x-zp-request-id') })
-    } catch (err) {
-      errorHandler(ctx, err)
-    }
-  }
-
-  export default { GET, POST }
-  ```
 
 - eslint
 
@@ -95,13 +42,13 @@
 - cli
 
   ```javascript
-  ctx.log.info(`[standout] $1 -> `, JSON.stringify($2))$3
+  ctx.log.info(`[standout] $1 -> `, $2)$3
   ```
 
 - cle
 
   ```javascript
-  ctx.log.error(`[standout] error -> $1`, simplify(err))$2
+  ctx.log.error(`[standout] error -> $1`, err)$2
   ```
 
 - zpthrow
@@ -129,17 +76,6 @@
   ```
 
 ## css
-
-- define bem
-
-  ```css
-  /* @define ${1:block};weak */
-  // #region ${1:block}
-  .${1:block} {
-    $2
-  }
-  // #endregion
-  ```
 
 - stylelint
 

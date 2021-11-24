@@ -12,7 +12,7 @@
   "publisher": "MrLeo",
   "icon": "logo.png",
   "engines": {
-    "vscode": "^1.41.0"
+		"vscode": "^1.62.0"
   },
   "homepage": "https://xuebin.me",
   "repository": {
@@ -22,7 +22,7 @@
   "categories": [
     "Other"
   ],
-  "main": "./dist/extension",
+	"main": "./dist/extension.js",
   "activationEvents": [
     "onCommand:extension.tag",
     "onCommand:extension.tagRefresh"
@@ -36,10 +36,6 @@
       {
         "command": "extension.tagRefresh",
         "title": "zpm: 删除远端不存在的Tag  ♻️ "
-      },
-      {
-        "command": "extension.createNodeApi",
-        "title": "zpm: 创建node-api接口"
       }
     ],
     "snippets": [
@@ -62,31 +58,39 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "webpack --mode production",
-    "compile": "webpack --mode none",
-    "watch": "webpack --mode development --watch --info-verbosity verbose",
-    "test-compile": "tsc -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+		"vscode:prepublish": "npm run package",
+		"compile": "webpack",
+		"watch": "webpack --watch",
+		"package": "webpack --mode production --devtool hidden-source-map",
+		"compile-tests": "tsc -p . --outDir out",
+		"watch-tests": "tsc -p -w . --outDir out",
+		"pretest": "npm run compile-tests && npm run compile && npm run lint",
+		"lint": "eslint src --ext ts",
+		"test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/execa": "^0.9.0",
-    "@types/mocha": "^2.2.42",
-    "@types/node": "^10.12.21",
-    "@types/semver": "^5.5.0",
-    "ts-loader": "^5.3.3",
-    "tslint": "^5.12.1",
-    "typescript": "^3.3.1",
-    "vscode": "^1.1.28",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0"
+		"@types/vscode": "^1.62.0",
+		"@types/glob": "^7.1.4",
+		"@types/mocha": "^9.0.0",
+		"@types/node": "14.x",
+		"@typescript-eslint/eslint-plugin": "^4.31.1",
+		"@typescript-eslint/parser": "^4.31.1",
+		"eslint": "^7.32.0",
+		"glob": "^7.1.7",
+		"mocha": "^9.1.1",
+		"typescript": "^4.4.3",
+		"ts-loader": "^9.2.5",
+		"webpack": "^5.52.1",
+		"webpack-cli": "^4.8.0",
+		"@vscode/test-electron": "^1.6.2",
+    "@types/semver": "^7.3.9",
+    "@types/fs-extra": "^9.0.13"
   },
   "dependencies": {
-    "@types/fs-extra": "^8.1.0",
-    "dayjs": "^1.8.10",
-    "execa": "^1.0.0",
-    "fs-extra": "^9.0.0",
-    "semver": "^5.6.0",
-    "simple-git": "^1.107.0"
+    "dayjs": "^1.10.7",
+    "execa": "^6.0.0",
+    "fs-extra": "^10.0.0",
+    "semver": "^7.3.5",
+    "simple-git": "^2.47.0"
   }
 }

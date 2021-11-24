@@ -9,6 +9,6 @@
  */
 
 export * from './common'
-export * from './tag'
 export * from './refresh-tags'
-export * from './createNodeApi'
+export * from './tag'
+

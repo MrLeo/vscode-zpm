@@ -50,7 +50,6 @@ export function registerCommands(context: ExtensionContext) {
 export enum Commands {
   tag = 'extension.tag',
   tagRefresh = 'extension.tagRefresh',
-  createNodeApi = 'extension.createNodeApi',
 }
 // #endregion
 
@@ -74,7 +73,7 @@ export async function showQuickPick(QuickPickList: QuickPickItem[]) {
     try {
       window.showQuickPick(QuickPickList).then(command => {
         console.log('TCL: showQuickPick -> command', command)
-        resolve(command)
+        command && resolve(command)
       })
     } catch (err) {
       console.log('TCL: catch -> err', err)
