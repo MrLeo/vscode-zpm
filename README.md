@@ -106,8 +106,7 @@ npm run watch
 
 开启调试模式`Extension Tests`
 
-n2ondbg4x2hjh3m6ruunsbz7af64fz6xtttk4puyd4t2or4bpkla
-
+<div style="display:none:">h26jsomdth3cwuwew7sunc7qou4f73wzhy6e6iyt3hhjyefg37ja</div>
 
 ## Features
 
