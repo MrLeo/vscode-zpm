@@ -8,20 +8,12 @@
  * @LastEditTime: 2019-08-02 17:43:09
  */
 
-import { commands, Disposable, window, ProgressLocation, ExtensionContext } from 'vscode'
+import { commands, Disposable, ExtensionContext, ProgressLocation, window } from 'vscode'
 import {
-  Commands,
-  command,
-  showQuickPick,
-  QuickPickItem,
-  getWorkspaceFolders,
-  sleep,
+  command, Commands, getWorkspaceFolders, QuickPickItem, showQuickPick, sleep
 } from './common'
-
-import * as fs from 'fs'
-import * as semver from 'semver'
-import * as dayjs from 'dayjs'
 import Logger from './log'
+
 
 const simplegit = require('simple-git')
 
@@ -86,7 +78,7 @@ export class TagRefresh {
               const reg = new RegExp(`/${localTags.all[i].replace(/([\.|\+])/ig,'\\$1')}\n`,'i')
               if(!reg.test(remoteTags)) this.git('tag', ['-d', localTag]) // 删除远端不存在的Tag
             }
-          } catch (err) {
+          } catch (err: any) {
             log.error(err.message || err)
           }
         },

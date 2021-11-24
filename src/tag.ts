@@ -8,20 +8,14 @@
  * @LastEditTime: 2019-08-02 17:43:09
  */
 
-import { commands, Disposable, window, ProgressLocation, ExtensionContext } from 'vscode'
-import {
-  Commands,
-  command,
-  showQuickPick,
-  QuickPickItem,
-  getWorkspaceFolders,
-  sleep,
-} from './common'
-
-import * as fs from 'fs'
-import * as semver from 'semver'
 import * as dayjs from 'dayjs'
+import * as semver from 'semver'
+import { commands, Disposable, ExtensionContext, ProgressLocation, window } from 'vscode'
+import {
+  command, Commands, getWorkspaceFolders, QuickPickItem, showQuickPick, sleep
+} from './common'
 import Logger from './log'
+
 
 const simplegit = require('simple-git')
 
@@ -116,7 +110,7 @@ export class Tag {
 
             this._logger(`env: ${this._env}`)
             this._logger(`path: ${this._path}`)
-          } catch (err) {
+          } catch (err:any) {
             log.error(err.message || err)
           }
         },
@@ -355,7 +349,7 @@ export class Tag {
         config.tag = `${env}-v${config.version}-${date}`
         this._logger(`标签生成 ${config.tag}`)
         resolve(config)
-      } catch (error) {
+      } catch (error: any) {
         log.error(error.message || error)
         reject(error)
       }

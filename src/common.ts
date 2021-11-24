@@ -8,7 +8,7 @@
  * @LastEditTime: 2019-05-07 11:19:38
  */
 
-import { ExtensionContext, window, workspace, WorkspaceFolder } from 'vscode'
+import { ExtensionContext, window, workspace } from 'vscode'
 
 // #region CommandConstructor: 接口 - 命令构造函数
 interface CommandConstructor {
@@ -88,7 +88,7 @@ export async function showQuickPick(QuickPickList: QuickPickItem[]) {
  * 获取目录列表
  */
 export function getWorkspaceFolders() {
-  const workspaceFolders: WorkspaceFolder[] = workspace.workspaceFolders || []
+  const workspaceFolders = workspace.workspaceFolders || []
   console.log('TCL: Tag -> getWorkspaceFolders -> workspaceFolders', workspaceFolders)
   console.log('TCL: Tag -> getWorkspaceFolders -> vscode.workspace.rootPath', workspace.rootPath)
   return workspaceFolders.map(folder => {
